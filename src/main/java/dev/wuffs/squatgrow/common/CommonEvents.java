@@ -64,15 +64,19 @@ public class CommonEvents {
                     if (block instanceof IGrowable && SquatGrow.allowTwerk(block.getRegistryName().toString(), block.getTags())) {
                         Random r = new Random();
                         double randomValue = 0 + (1 - 0) * r.nextDouble();
-                        SquatGrow.getLogger().debug("Rand value:" + randomValue);
+                        if (Config.debug.get()) {
+                            SquatGrow.getLogger().debug("Rand value:" + randomValue);
+                        }
                         if (Config.chance.get() >= randomValue){
                             BoneMealItem.applyBonemeal(new ItemStack(Items.BONE_MEAL), level, blockPos, player);
                             ((ServerWorld) level).sendParticles((ServerPlayerEntity) player, ParticleTypes.HAPPY_VILLAGER, false, blockPos.getX() + 0.05D, blockPos.getY() + 0.05D, blockPos.getZ(), 10, 0.5, 0.5, 0.5, 3);
-                            SquatGrow.getLogger().debug("====================================================");
-                            SquatGrow.getLogger().debug("Block: " + block.getRegistryName().toString());
-                            SquatGrow.getLogger().debug("Tags: " + block.getTags());
-                            SquatGrow.getLogger().debug("Pos: " + blockPos);
-                            SquatGrow.getLogger().debug("====================================================");
+                            if (Config.debug.get()) {
+                                SquatGrow.getLogger().debug("====================================================");
+                                SquatGrow.getLogger().debug("Block: " + block.getRegistryName().toString());
+                                SquatGrow.getLogger().debug("Tags: " + block.getTags());
+                                SquatGrow.getLogger().debug("Pos: " + blockPos);
+                                SquatGrow.getLogger().debug("====================================================");
+                            }
                         }
                     }
                 }
