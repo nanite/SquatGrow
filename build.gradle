@@ -19,7 +19,7 @@ apply from: 'https://files.saps.dev/ci/git-md-changelog.gradle'
 
 def ENV = System.getenv()
 
-version = "${mod_version}+mc${minecraft_version}-build.${ENV.GITHUB_RUN_NUMBER ?: 9999}"
+version = "${mod_version}-build.${ENV.GITHUB_RUN_NUMBER ?: 9999}+mc${minecraft_version}"
 group = 'dev.wuffs'
 archivesBaseName = 'SquatGrow'
 
