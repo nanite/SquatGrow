@@ -119,7 +119,7 @@ publishing {
 
 
     repositories {
-        if (ENV.SAPS_TOKEN) {
+        if (ENV.NANITE_DEPLOY) {
             maven {
                 url "https://maven.nanite.dev/"
                 credentials {
@@ -139,7 +139,7 @@ if (ENV.CURSE_DEPLOY) {
             releaseType = "release"
             addGameVersion "Forge"
             addGameVersion "${minecraft_version}"
-            mainArtifact(remapJar.archivePath)
+            mainArtifact(jar)
             changelog = getGitChangelog
             changelogType = 'markdown'
         }
