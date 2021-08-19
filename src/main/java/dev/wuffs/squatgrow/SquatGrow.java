@@ -29,23 +29,31 @@ public class SquatGrow {
 
         if (Config.useWhitelist.get()) {
             if(Config.whitelist.get().contains(regName)){
-                LOGGER.debug("Whitelist contains reg: " + regName);
+                if (Config.debug.get()) {
+                    LOGGER.debug("Whitelist contains reg: " + regName);
+                }
                 return true;
             }
             if(rawTags.size() > 0){
                 for (ResourceLocation tag : rawTags){
                     if(Config.whitelist.get().contains("#" + tag.toString())){
-                        LOGGER.debug("Whitelist contains tag: " + "#" + regName);
+                        if (Config.debug.get()) {
+                            LOGGER.debug("Whitelist contains tag: " + "#" + regName);
+                        }
                         return true;
                     }
                 }
             }
-            LOGGER.debug("Whitelist does NOT contain: " + regName);
+            if (Config.debug.get()) {
+                LOGGER.debug("Whitelist does NOT contain: " + regName);
+            }
             return false;
         }
 
         if(Config.blacklist.get().contains(regName)){
-            LOGGER.debug("Blacklist contains reg: " + regName);
+            if (Config.debug.get()) {
+                LOGGER.debug("Blacklist contains reg: " + regName);
+            }
             return false;
         }
 
@@ -54,10 +62,14 @@ public class SquatGrow {
                 if(Config.blacklist.get().contains("#" + tag.toString())){
                     return false;
                 }
-                LOGGER.debug("Blacklist does NOT contain tag: " + "#" + tag);
+                if (Config.debug.get()) {
+                    LOGGER.debug("Blacklist does NOT contain tag: " + "#" + tag);
+                }
             }
         }
-        LOGGER.debug("Nothing contains: " + regName);
+        if (Config.debug.get()) {
+            LOGGER.debug("Nothing contains: " + regName);
+        }
         return true;
     }
 }
