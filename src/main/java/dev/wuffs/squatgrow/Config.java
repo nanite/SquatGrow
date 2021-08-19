@@ -10,6 +10,7 @@ public class Config {
 
     public static ForgeConfigSpec CONFIG;
 
+    public static ForgeConfigSpec.BooleanValue debug;
     public static ForgeConfigSpec.BooleanValue opMode;
     public static ForgeConfigSpec.BooleanValue useWhitelist;
     public static ForgeConfigSpec.IntValue range;
@@ -29,6 +30,8 @@ public class Config {
         defaultBlacklist.add("minecraft:crimson_nylium");
 
         BUILDER.comment("General settings").push(CATEGORY_GENERAL);
+        debug = BUILDER.comment("Enable debug logging")
+                .define("debug", false);
         opMode = BUILDER.comment("Enables OP mode!", "Enable at your own risk")
                 .define("opMode", false);
         useWhitelist = BUILDER.comment("Use whitelist instead of blacklist")

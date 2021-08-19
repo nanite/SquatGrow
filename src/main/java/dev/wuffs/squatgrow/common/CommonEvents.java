@@ -58,21 +58,25 @@ public class CommonEvents {
 
         for (int x = -Config.range.get(); x <= Config.range.get(); x++) {
             for (int z = -Config.range.get(); z <= Config.range.get(); z++) {
-                for (int y = -1; y <= 1; y++){
+                for (int y = -1; y <= 1; y++) {
                     BlockPos blockPos = new BlockPos(pos.getX() + x, pos.getY() + y, pos.getZ() + z);
                     Block block = level.getBlockState(blockPos).getBlock();
                     if (block instanceof BonemealableBlock && SquatGrow.allowTwerk(block.getRegistryName().toString(), block.getTags())) {
                         Random r = new Random();
                         double randomValue = 0 + (1 - 0) * r.nextDouble();
-                        SquatGrow.getLogger().debug("Rand value:" + randomValue);
-                        if (Config.chance.get() >= randomValue){
+                        if (Config.debug.get()) {
+                            SquatGrow.getLogger().debug("Rand value:" + randomValue);
+                        }
+                        if (Config.chance.get() >= randomValue) {
                             BoneMealItem.applyBonemeal(new ItemStack(Items.BONE_MEAL), level, blockPos, player);
                             ((ServerLevel) level).sendParticles((ServerPlayer) player, ParticleTypes.HAPPY_VILLAGER, false, blockPos.getX() + 0.05D, blockPos.getY() + 0.05D, blockPos.getZ(), 10, 0.5, 0.5, 0.5, 3);
-                            SquatGrow.getLogger().debug("====================================================");
-                            SquatGrow.getLogger().debug("Block: " + block.getRegistryName().toString());
-                            SquatGrow.getLogger().debug("Tags: " + block.getTags());
-                            SquatGrow.getLogger().debug("Pos: " + blockPos);
-                            SquatGrow.getLogger().debug("====================================================");
+                            if (Config.debug.get()) {
+                                SquatGrow.getLogger().debug("====================================================");
+                                SquatGrow.getLogger().debug("Block: " + block.getRegistryName().toString());
+                                SquatGrow.getLogger().debug("Tags: " + block.getTags());
+                                SquatGrow.getLogger().debug("Pos: " + blockPos);
+                                SquatGrow.getLogger().debug("====================================================");
+                            }
                         }
                     }
                 }
