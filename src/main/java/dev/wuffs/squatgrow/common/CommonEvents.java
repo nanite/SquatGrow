@@ -13,6 +13,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.BonemealableBlock;
+import net.minecraft.world.level.block.SugarCaneBlock;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -61,14 +62,18 @@ public class CommonEvents {
                 for (int y = -1; y <= 1; y++) {
                     BlockPos blockPos = new BlockPos(pos.getX() + x, pos.getY() + y, pos.getZ() + z);
                     Block block = level.getBlockState(blockPos).getBlock();
-                    if (block instanceof BonemealableBlock && SquatGrow.allowTwerk(block.getRegistryName().toString(), block.getTags())) {
+                    if ((block instanceof BonemealableBlock || block instanceof SugarCaneBlock) && SquatGrow.allowTwerk(block.getRegistryName().toString(), block.getTags())) {
                         Random r = new Random();
                         double randomValue = 0 + (1 - 0) * r.nextDouble();
                         if (Config.debug.get()) {
                             SquatGrow.getLogger().debug("Rand value:" + randomValue);
                         }
                         if (Config.chance.get() >= randomValue) {
-                            BoneMealItem.applyBonemeal(new ItemStack(Items.BONE_MEAL), level, blockPos, player);
+                            if (block instanceof SugarCaneBlock) {
+                                block.randomTick(level.getBlockState(blockPos), (ServerLevel) level, blockPos, level.random);
+                            } else {
+                                BoneMealItem.applyBonemeal(new ItemStack(Items.BONE_MEAL), level, blockPos, player);
+                            }
                             ((ServerLevel) level).sendParticles((ServerPlayer) player, ParticleTypes.HAPPY_VILLAGER, false, blockPos.getX() + 0.05D, blockPos.getY() + 0.05D, blockPos.getZ(), 10, 0.5, 0.5, 0.5, 3);
                             if (Config.debug.get()) {
                                 SquatGrow.getLogger().debug("====================================================");
