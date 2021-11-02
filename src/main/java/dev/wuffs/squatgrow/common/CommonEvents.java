@@ -2,16 +2,14 @@ package dev.wuffs.squatgrow.common;
 
 import dev.wuffs.squatgrow.Config;
 import dev.wuffs.squatgrow.SquatGrow;
-import net.minecraft.block.Block;
-import net.minecraft.block.CropsBlock;
-import net.minecraft.block.IGrowable;
-import net.minecraft.block.SugarCaneBlock;
+import net.minecraft.block.*;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.BoneMealItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.particles.ParticleTypes;
+import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -25,6 +23,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 import java.util.UUID;
+
+import static net.minecraft.item.BoneMealItem.addGrowthParticles;
 
 public class CommonEvents {
 
@@ -85,7 +85,8 @@ public class CommonEvents {
                                     BoneMealItem.applyBonemeal(new ItemStack(Items.BONE_MEAL), level, blockPos, player);
                                 }
                             }
-                            ((ServerWorld) level).sendParticles((ServerPlayerEntity) player, ParticleTypes.HAPPY_VILLAGER, false, blockPos.getX() + 0.05D, blockPos.getY() + 0.05D, blockPos.getZ(), 10, 0.5, 0.5, 0.5, 3);
+//                            ((ServerWorld) level).sendParticles((ServerPlayerEntity) player, ParticleTypes.HAPPY_VILLAGER, false, blockPos.getX() + 0.5D, blockPos.getY() + 0.5D, blockPos.getZ() + 0.1D, 10, 0.5, 0.5, 0.5, 3);
+                            addGrowthParticles((ServerWorld) level, blockPos, (ServerPlayerEntity) player);
                             if (Config.debug.get()) {
                                 SquatGrow.getLogger().debug("====================================================");
                                 SquatGrow.getLogger().debug("Block: " + block.getRegistryName().toString());
@@ -95,6 +96,43 @@ public class CommonEvents {
                             }
                         }
                     }
+                }
+            }
+        }
+    }
+
+    private static void addGrowthParticles(ServerWorld level, BlockPos pos, ServerPlayerEntity player) {
+        Random random = new Random();
+        int numParticles = 2;
+
+        BlockState blockstate = level.getBlockState(pos);
+        if (!blockstate.isAir(level, pos)) {
+            double d0 = 0.5D;
+            double d1;
+            if (blockstate.is(Blocks.WATER)) {
+                numParticles *= 3;
+                d1 = 1.0D;
+                d0 = 3.0D;
+            } else if (blockstate.isSolidRender(level, pos)) {
+                pos = pos.above();
+                numParticles *= 3;
+                d0 = 3.0D;
+                d1 = 1.0D;
+            } else {
+                d1 = blockstate.getShape(level, pos).max(Direction.Axis.Y);
+            }
+            level.sendParticles(player, ParticleTypes.HAPPY_VILLAGER, false, pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, numParticles, 0.0D, 0.0D, 0.5, 0.5);
+
+            for (int i = 0; i < numParticles; ++i) {
+                double d2 = random.nextGaussian() * 0.02D;
+                double d3 = random.nextGaussian() * 0.02D;
+                double d4 = random.nextGaussian() * 0.02D;
+                double d5 = 0.5D - d0;
+                double x = pos.getX() + d5 + random.nextDouble() * d0 * 2.0D;
+                double y = pos.getY() + random.nextDouble() * d1;
+                double z = pos.getZ() + d5 + random.nextDouble() * d0 * 2.0D;
+                if (!level.getBlockState((new BlockPos(x, y, z)).below()).isAir()) {
+                    level.sendParticles(player, ParticleTypes.HAPPY_VILLAGER, false, x, y, z, numParticles, d2, d3, d4, 0.5);
                 }
             }
         }
