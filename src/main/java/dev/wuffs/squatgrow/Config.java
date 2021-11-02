@@ -12,6 +12,7 @@ public class Config {
 
     public static ForgeConfigSpec.BooleanValue debug;
     public static ForgeConfigSpec.BooleanValue opMode;
+    public static ForgeConfigSpec.BooleanValue enableMysticalCrops;
     public static ForgeConfigSpec.BooleanValue useWhitelist;
     public static ForgeConfigSpec.IntValue range;
     public static ForgeConfigSpec.DoubleValue chance;
@@ -34,6 +35,8 @@ public class Config {
                 .define("debug", false);
         opMode = BUILDER.comment("Enables OP mode!", "Enable at your own risk")
                 .define("opMode", false);
+        enableMysticalCrops = BUILDER.comment("Enable mystical crops")
+                .define("enableMysticalCrops", true);
         useWhitelist = BUILDER.comment("Use whitelist instead of blacklist")
                 .define("useWhitelist", false);
         range = BUILDER.comment("Range for bonemeal effect")
@@ -42,7 +45,7 @@ public class Config {
                 .defineInRange("chance", 0.5, 0, 1.0);
         blacklist = BUILDER.comment("List of blocks to blacklist from twerking", "Tags can be used by using #minecraft:<tag_name> or #modid:<tag_name>")
                 .define("blacklist", defaultBlacklist);
-        whitelist = BUILDER.comment("If useWhitelist is true use, only allow twerking the list below","Tags can be used by using #minecraft:<tag_name> or #modid:<tag_name>")
+        whitelist = BUILDER.comment("If useWhitelist is true use, only allow twerking the list below", "Tags can be used by using #minecraft:<tag_name> or #modid:<tag_name>")
                 .define("whitelist", new ArrayList<>());
 
         BUILDER.pop();

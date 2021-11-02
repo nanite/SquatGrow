@@ -86,6 +86,8 @@ repositories {
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 //    runtimeOnly fg.deobf("curse.maven:terraforged-363820:3414123")
+//    runtimeOnly fg.deobf("curse.maven:mystical-agriculture-246640:3467262")
+//    runtimeOnly fg.deobf("curse.maven:cucumber-272335:3507102")
 }
 
 jar {

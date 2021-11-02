@@ -3,6 +3,7 @@ package dev.wuffs.squatgrow.common;
 import dev.wuffs.squatgrow.Config;
 import dev.wuffs.squatgrow.SquatGrow;
 import net.minecraft.block.Block;
+import net.minecraft.block.CropsBlock;
 import net.minecraft.block.IGrowable;
 import net.minecraft.block.SugarCaneBlock;
 import net.minecraft.entity.player.PlayerEntity;
@@ -11,11 +12,13 @@ import net.minecraft.item.BoneMealItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.particles.ParticleTypes;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 
 import java.util.HashMap;
@@ -25,9 +28,13 @@ import java.util.UUID;
 
 public class CommonEvents {
 
+    private static final ResourceLocation MYSTICAL_TAG = new ResourceLocation("mysticalagriculture", "crops");
+
     private static Map<UUID, Boolean> playerSneaking = new HashMap<>();
+    public static boolean isMysticalLoaded = false;
 
     public static void init(final FMLCommonSetupEvent event) {
+        isMysticalLoaded = ModList.get().isLoaded("mysticalagriculture");
         MinecraftForge.EVENT_BUS.addListener(CommonEvents::playerTickEvent);
     }
 
@@ -72,7 +79,11 @@ public class CommonEvents {
                             if (block instanceof SugarCaneBlock) {
                                 block.randomTick(level.getBlockState(blockPos), ((ServerWorld) level), blockPos, level.random);
                             } else {
-                                BoneMealItem.applyBonemeal(new ItemStack(Items.BONE_MEAL), level, blockPos, player);
+                                if (isMysticalLoaded && block.getTags().contains(MYSTICAL_TAG) && Config.enableMysticalCrops.get()) {
+                                    ((CropsBlock) block).growCrops(level, blockPos, level.getBlockState(blockPos));
+                                } else {
+                                    BoneMealItem.applyBonemeal(new ItemStack(Items.BONE_MEAL), level, blockPos, player);
+                                }
                             }
                             ((ServerWorld) level).sendParticles((ServerPlayerEntity) player, ParticleTypes.HAPPY_VILLAGER, false, blockPos.getX() + 0.05D, blockPos.getY() + 0.05D, blockPos.getZ(), 10, 0.5, 0.5, 0.5, 3);
                             if (Config.debug.get()) {
