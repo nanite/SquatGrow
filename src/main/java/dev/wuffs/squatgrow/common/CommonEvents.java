@@ -8,6 +8,8 @@ import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BoneMealItem;
 import net.minecraft.world.item.ItemStack;
@@ -133,6 +135,7 @@ public class CommonEvents {
                 double z = pos.getZ() + d5 + random.nextDouble() * d0 * 2.0D;
                 if (!level.getBlockState((new BlockPos(x, y, z)).below()).isAir()) {
                     level.sendParticles(player, ParticleTypes.HAPPY_VILLAGER, false, x, y, z, numParticles, d2, d3, d4, 0.5);
+                    level.playSound(null, pos, SoundEvents.BONE_MEAL_USE, SoundSource.MASTER, 0.1F, 1.0F);
                 }
             }
         }
