@@ -4,12 +4,14 @@ import dev.wuffs.squatgrow.Config;
 import dev.wuffs.squatgrow.SquatGrow;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BoneMealItem;
 import net.minecraft.world.item.ItemStack;
@@ -30,7 +32,7 @@ import java.util.UUID;
 
 public class CommonEvents {
 
-    private static final ResourceLocation MYSTICAL_TAG = new ResourceLocation("mysticalagriculture", "crops");
+    private static final TagKey<Block> MYSTICAL_TAG = TagKey.create(Registry.BLOCK_REGISTRY,new ResourceLocation("mysticalagriculture", "crops"));
 
     private static Map<UUID, Boolean> playerSneaking = new HashMap<>();
     public static boolean isMysticalLoaded = false;
@@ -70,8 +72,9 @@ public class CommonEvents {
             for (int z = -Config.range.get(); z <= Config.range.get(); z++) {
                 for (int y = -1; y <= 1; y++) {
                     BlockPos blockPos = new BlockPos(pos.getX() + x, pos.getY() + y, pos.getZ() + z);
-                    Block block = level.getBlockState(blockPos).getBlock();
-                    if ((block instanceof BonemealableBlock || block instanceof SugarCaneBlock) && SquatGrow.allowTwerk(block.getRegistryName().toString(), block.getTags())) {
+                    BlockState blockState = level.getBlockState(blockPos);
+                    Block block = blockState.getBlock();
+                    if ((block instanceof BonemealableBlock || block instanceof SugarCaneBlock) && SquatGrow.allowTwerk(blockState)) {
                         Random r = new Random();
                         double randomValue = 0 + (1 - 0) * r.nextDouble();
                         if (Config.debug.get()) {
@@ -81,7 +84,7 @@ public class CommonEvents {
                             if (block instanceof SugarCaneBlock) {
                                 block.randomTick(level.getBlockState(blockPos), ((ServerLevel) level), blockPos, level.random);
                             } else {
-                                if (isMysticalLoaded && block.getTags().contains(MYSTICAL_TAG) && Config.enableMysticalCrops.get()) {
+                                if (isMysticalLoaded && block.builtInRegistryHolder().tags().toList().contains(MYSTICAL_TAG) && Config.enableMysticalCrops.get()) {
                                     ((CropBlock) block).growCrops(level, blockPos, level.getBlockState(blockPos));
                                 } else {
                                     BoneMealItem.applyBonemeal(new ItemStack(Items.BONE_MEAL), level, blockPos, player);
@@ -92,7 +95,7 @@ public class CommonEvents {
                             if (Config.debug.get()) {
                                 SquatGrow.getLogger().debug("====================================================");
                                 SquatGrow.getLogger().debug("Block: " + block.getRegistryName().toString());
-                                SquatGrow.getLogger().debug("Tags: " + block.getTags());
+                                SquatGrow.getLogger().debug("Tags: " + block.builtInRegistryHolder().tags().toList().toString());
                                 SquatGrow.getLogger().debug("Pos: " + blockPos);
                                 SquatGrow.getLogger().debug("====================================================");
                             }
