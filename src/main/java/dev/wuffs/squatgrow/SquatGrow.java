@@ -9,6 +9,7 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -27,7 +28,7 @@ public class SquatGrow {
     }
 
     public static Boolean allowTwerk(BlockState state) {
-        var regName = state.getBlock().getRegistryName().toString();
+        var regName = ForgeRegistries.BLOCKS.getKey(state.getBlock()).toString();
         var rawTags = state.getBlock().builtInRegistryHolder().tags().toList();
         if (Config.useWhitelist.get()) {
             if (Config.whitelist.get().contains(regName)) {

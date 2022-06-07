@@ -24,6 +24,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -94,7 +95,7 @@ public class CommonEvents {
                             addGrowthParticles((ServerLevel) level, blockPos, (ServerPlayer) player);
                             if (Config.debug.get()) {
                                 SquatGrow.getLogger().debug("====================================================");
-                                SquatGrow.getLogger().debug("Block: " + block.getRegistryName().toString());
+                                SquatGrow.getLogger().debug("Block: " + ForgeRegistries.BLOCKS.getKey(block).toString());
                                 SquatGrow.getLogger().debug("Tags: " + block.builtInRegistryHolder().tags().toList().toString());
                                 SquatGrow.getLogger().debug("Pos: " + blockPos);
                                 SquatGrow.getLogger().debug("====================================================");
