@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "id": "squatgrow",
+  "version": "${version}",
+  "name": "Squat Grow",
+  "description": "Squat up and down to grow your plant",
+  "authors": [
+    "Gaz"
+  ],
+  "contact": {
+    "homepage": "https://fabricmc.net/",
+    "sources": "https://github.com/FabricMC/fabric-example-mod"
+  },
+  "license": "ARR",
+  "icon": "assets/examplemod/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "main": [
+      "dev.wuffs.squatgrow.SquatGrow::init"
+    ]
+  },
+  "depends": {
+    "fabric": "*",
+    "minecraft": ">=1.18.2",
+    "architectury": ">=4.9.83"
+  }
+}

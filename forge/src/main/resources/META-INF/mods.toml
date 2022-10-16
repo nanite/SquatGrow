@@ -1,0 +1,35 @@
+modLoader = "javafml"
+loaderVersion = "[40,)"
+license="All rights reserved"
+
+[[mods]]
+modId="squatgrow"
+version="${version}"
+displayName="Squat Grow"
+logoFile="examplemod.png"
+credits="Me"
+authors="Gaz"
+description='''
+Squat up and down to grow your plant
+'''
+
+[[dependencies.squatgrow]]
+modId = "forge"
+mandatory = true
+versionRange = "[40,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.squatgrow]]
+modId = "minecraft"
+mandatory = true
+versionRange = "[1.18.2,)"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.squatgrow]]
+modId = "architectury"
+mandatory = true
+versionRange = "[4.9.83,)"
+ordering = "AFTER"
+side = "BOTH"
