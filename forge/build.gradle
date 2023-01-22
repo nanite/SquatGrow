@@ -90,12 +90,12 @@ publishing {
 
     // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
     repositories {
-        if (ENV.NANITE_DEPLOY) {
+        if (ENV.NANITE_TOKEN) {
             maven {
                 url "https://maven.nanite.dev/releases"
                 credentials {
                     username = "nanite"
-                    password = "${ENV.NANITE_DEPLOY}"
+                    password = "${ENV.NANITE_TOKEN}"
                 }
             }
         }
@@ -113,6 +113,7 @@ if (ENV.CURSE_DEPLOY) {
             addGameVersion "${minecraft_version}"
             relations {
                 requiredDependency 'architectury-api'
+                requiredDependency 'cloth-config'
             }
             mainArtifact(remapJar)
             changelog = file("../CHANGELOG.md")
@@ -120,3 +121,5 @@ if (ENV.CURSE_DEPLOY) {
         }
     }
 }
+
+rootProject.tasks.getByName("curseforgePublish").dependsOn tasks.getByName("curseforge")
