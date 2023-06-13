@@ -8,7 +8,7 @@ import dev.wuffs.squatgrow.config.SquatGrowConfig;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.ConfigHolder;
 import me.shedaniel.autoconfig.serializer.YamlConfigSerializer;
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -72,7 +72,7 @@ public class SquatGrow {
 
         tagCache.addAll(newConfig.ignoreList.stream()
                 .filter(e -> e.contains("#"))
-                .map(e -> TagKey.create(Registry.BLOCK_REGISTRY, new ResourceLocation(e.replace("#", ""))))
+                .map(e -> TagKey.create(Registries.BLOCK, new ResourceLocation(e.replace("#", ""))))
                 .collect(Collectors.toSet()));
 
         wildcardCache.addAll(newConfig.ignoreList.stream().filter(e -> e.contains("*")).map(e -> e.split(":")[0])

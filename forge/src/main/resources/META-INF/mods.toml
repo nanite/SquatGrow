@@ -16,20 +16,20 @@ Squat up and down to grow your plant
 [[dependencies.squatgrow]]
 modId = "forge"
 mandatory = true
-versionRange = "[43,)"
+versionRange = "[46,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.squatgrow]]
 modId = "minecraft"
 mandatory = true
-versionRange = "[1.19.2,)"
+versionRange = "[1.20,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.squatgrow]]
 modId = "architectury"
 mandatory = true
-versionRange = "[6.2.46,)"
+versionRange = "[9.0.8,)"
 ordering = "AFTER"
 side = "BOTH"

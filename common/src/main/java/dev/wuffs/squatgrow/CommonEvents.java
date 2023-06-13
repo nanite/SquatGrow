@@ -2,8 +2,8 @@ package dev.wuffs.squatgrow;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Registry;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -28,13 +28,13 @@ import static dev.wuffs.squatgrow.SquatGrow.config;
 
 public class CommonEvents {
 
-    private static final TagKey<Block> MYSTICAL_TAG = TagKey.create(Registry.BLOCK_REGISTRY,new ResourceLocation("mysticalagriculture", "crops"));
+    private static final TagKey<Block> MYSTICAL_TAG = TagKey.create(Registries.BLOCK,new ResourceLocation("mysticalagriculture", "crops"));
 
     private static Map<UUID, Boolean> playerSneaking = new HashMap<>();
     public static boolean isMysticalLoaded = false;
 
     public static void onPlayerTick(Player player) {
-        if (player.level.isClientSide) return;
+        if (player.level().isClientSide) return;
         if (!config.allowAdventureTwerking && ((ServerPlayer) player).gameMode.getGameModeForPlayer() == GameType.ADVENTURE) return;
 
         if (playerSneaking.containsKey(player.getUUID())) {
@@ -50,7 +50,7 @@ public class CommonEvents {
     }
 
     public static void doBoneMeal(Player player) {
-        Level level = player.level;
+        Level level = player.level();
         BlockPos pos = player.blockPosition();
 
         for (int x = -config.range; x <= config.range; x++) {
@@ -79,7 +79,7 @@ public class CommonEvents {
                             addGrowthParticles((ServerLevel) level, blockPos, (ServerPlayer) player);
                             if (config.debug) {
                                 SquatGrow.getLogger().debug("====================================================");
-                                SquatGrow.getLogger().debug("Block: " + Registry.BLOCK.getKey(block).toString());
+//                                SquatGrow.getLogger().debug("Block: " + Registry.BLOCK.getKey(block).toString());
                                 SquatGrow.getLogger().debug("Tags: " + block.builtInRegistryHolder().tags().toList().toString());
                                 SquatGrow.getLogger().debug("Pos: " + blockPos);
                                 SquatGrow.getLogger().debug("====================================================");
@@ -118,10 +118,10 @@ public class CommonEvents {
                 double d3 = random.nextGaussian() * 0.02D;
                 double d4 = random.nextGaussian() * 0.02D;
                 double d5 = 0.5D - d0;
-                double x = pos.getX() + d5 + random.nextDouble() * d0 * 2.0D;
-                double y = pos.getY() + random.nextDouble() * d1;
-                double z = pos.getZ() + d5 + random.nextDouble() * d0 * 2.0D;
-                if (!level.getBlockState((new BlockPos(x, y, z)).below()).isAir()) {
+                double x = pos.getX() + d5 + random.nextInt() * d0 * 2;
+                double y = pos.getY() + random.nextInt() * d1;
+                double z = pos.getZ() + d5 + random.nextInt() * d0 * 2;
+                if (!level.getBlockState((new BlockPos((int)x, (int)y, (int)z)).below()).isAir()) {
                     level.sendParticles(player, ParticleTypes.HAPPY_VILLAGER, false, x, y, z, numParticles, d2, d3, d4, 0.5);
                     level.playSound(null, pos, SoundEvents.BONE_MEAL_USE, SoundSource.MASTER, 0.1F, 1.0F);
                 }
