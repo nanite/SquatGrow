@@ -85,21 +85,21 @@ publishing {
     }
 
     repositories {
-        if (ENV.NANITE_DEPLOY) {
+        if (ENV.NANITE_TOKEN) {
             maven {
-                url "https://maven.nanite.dev/"
+                url "https://maven.nanite.dev/releases"
                 credentials {
                     username = "nanite"
-                    password = "${ENV.NANITE_DEPLOY}"
+                    password = "${ENV.NANITE_TOKEN}"
                 }
             }
         }
     }
 }
 
-if (ENV.CURSE_DEPLOY) {
+if (ENV.CURSE_TOKEN) {
     curseforge {
-        apiKey = ENV.CURSE_DEPLOY
+        apiKey = ENV.CURSE_TOKEN
         project {
             id = project.curseforge_id
             releaseType = "release"
@@ -110,7 +110,7 @@ if (ENV.CURSE_DEPLOY) {
                 requiredDependency 'fabric-api'
                 requiredDependency 'architectury-api'
             }
-            mainArtifact(remapJar.archivePath)
+            mainArtifact(remapJar)
             changelog = file("../CHANGELOG.md")
             changelogType = 'markdown'
         }
