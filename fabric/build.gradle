@@ -109,6 +109,7 @@ if (ENV.CURSE_TOKEN) {
             relations {
                 requiredDependency 'fabric-api'
                 requiredDependency 'architectury-api'
+                requiredDependency 'cloth-config'
             }
             mainArtifact(remapJar)
             changelog = file("../CHANGELOG.md")

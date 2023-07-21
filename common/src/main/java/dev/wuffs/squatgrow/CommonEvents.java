@@ -123,7 +123,7 @@ public class CommonEvents {
                 double z = pos.getZ() + d5 + random.nextInt() * d0 * 2;
                 if (!level.getBlockState((new BlockPos((int)x, (int)y, (int)z)).below()).isAir()) {
                     level.sendParticles(player, ParticleTypes.HAPPY_VILLAGER, false, x, y, z, numParticles, d2, d3, d4, 0.5);
-                    level.playSound(null, pos, SoundEvents.BONE_MEAL_USE, SoundSource.MASTER, 0.1F, 1.0F);
+                    level.playSound(null, pos, SoundEvents.BONE_MEAL_USE, SoundSource.MASTER, 0.5F, 1.0F);
                 }
             }
         }
