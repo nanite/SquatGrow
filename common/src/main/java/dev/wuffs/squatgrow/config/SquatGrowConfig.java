@@ -16,11 +16,11 @@ public class SquatGrowConfig implements ConfigData {
     @Comment("Enable debug logging")
     public boolean debug = false;
 
-    @Comment("Enable Mystical Crops")
-    public boolean enableMysticalCrops = true;
+    @Comment("Require hoe to allow growth")
+    public boolean requireHoe = true;
 
-    @Comment("Allow twerking in adventure mode, default true")
-    public boolean allowAdventureTwerking = true;
+//    @Comment("Hoe takes damage on growth")
+//    public boolean hoeTakesDamage = true;
 
     @Comment("Use whitelist instead of blacklist, default false")
     public boolean useWhitelist = false;
@@ -41,4 +41,10 @@ public class SquatGrowConfig implements ConfigData {
             "minecraft:warped_nylium",
             "minecraft:crimson_nylium"
     ));
+
+    @Comment("Enable Mystical Crops")
+    public boolean enableMysticalCrops = true;
+
+    @Comment("Allow twerking in adventure mode, default true")
+    public boolean allowAdventureTwerking = true;
 }
