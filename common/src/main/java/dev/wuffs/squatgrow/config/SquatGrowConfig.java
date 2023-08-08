@@ -22,6 +22,9 @@ public class SquatGrowConfig implements ConfigData {
     @Comment("Allow twerking in adventure mode, default true")
     public boolean allowAdventureTwerking = true;
 
+    @Comment("Require hoe to allow growth")
+    public boolean requireHoe = true;
+
     @Comment("Use whitelist instead of blacklist, default false")
     public boolean useWhitelist = false;
 

@@ -9,9 +9,11 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BoneMealItem;
+import net.minecraft.world.item.HoeItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
@@ -40,6 +42,8 @@ public class CommonEvents {
         if (playerSneaking.containsKey(player.getUUID())) {
             if (player.isCrouching() && !playerSneaking.get(player.getUUID())) {
                 playerSneaking.put(player.getUUID(), true);
+                boolean handContainsHoe = (player.getMainHandItem().getItem() instanceof HoeItem | player.getOffhandItem().getItem() instanceof HoeItem);
+                if (config.requireHoe && !handContainsHoe) return;
                 doBoneMeal(player);
             } else if (playerSneaking.get(player.getUUID()) && !player.isCrouching()) {
                 playerSneaking.put(player.getUUID(), false);
