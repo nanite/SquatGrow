@@ -89,12 +89,12 @@ publishing {
 
     // See https://docs.gradle.org/current/userguide/publishing_maven.html for information on how to set up publishing.
     repositories {
-        if (ENV.NANITE_DEPLOY) {
+        if (ENV.NANITE_TOKEN) {
             maven {
-                url "https://maven.nanite.dev/"
+                url "https://maven.nanite.dev/releases"
                 credentials {
                     username = "nanite"
-                    password = "${ENV.NANITE_DEPLOY}"
+                    password = "${ENV.NANITE_TOKEN}"
                 }
             }
         }
