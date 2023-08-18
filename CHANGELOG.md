@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [5.0.4]
+
+- Better sugar cane chances
+
 ## [5.0.3]
 
 - Added config option requiring hoe to be held

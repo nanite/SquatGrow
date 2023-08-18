@@ -68,6 +68,10 @@ public class CommonEvents {
                         }
                         if (config.chance >= randomValue) {
                             if (block instanceof SugarCaneBlock) {
+                                // Todo make this a loop with a config option for the multiplier
+                                block.randomTick(level.getBlockState(blockPos), ((ServerLevel) level), blockPos, level.random);
+                                block.randomTick(level.getBlockState(blockPos), ((ServerLevel) level), blockPos, level.random);
+                                block.randomTick(level.getBlockState(blockPos), ((ServerLevel) level), blockPos, level.random);
                                 block.randomTick(level.getBlockState(blockPos), ((ServerLevel) level), blockPos, level.random);
                             } else {
                                 if (isMysticalLoaded && block.builtInRegistryHolder().tags().toList().contains(MYSTICAL_TAG) && config.enableMysticalCrops) {
