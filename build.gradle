@@ -61,7 +61,8 @@ publishMods {
 
     def forgeOptions = publishOptions {
         file = project.provider { project(":forge").tasks.remapJar }.flatMap { it.archiveFile }
-        displayName = "${project.name} Forge ${mod_version}+mc${minecraft_version}"
+        displayName = "${project.name} NeoForge ${mod_version}+mc${minecraft_version}"
+        modLoaders.add("neoforge")
         modLoaders.add("forge")
     }
 

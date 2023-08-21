@@ -1,6 +1,17 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [5.1.0]
+
+### Possibly breaking
+- Build for NeoForge instead of Forge
+  - Should still work on forge
+- Refactored code
+
+### Additions/Changes
+- Added support for AE2 growth acceleratable blocks
+- Added multiplier config option for sugarcane and ae2
+
 ## [5.0.4]
 
 - Better sugar cane chances

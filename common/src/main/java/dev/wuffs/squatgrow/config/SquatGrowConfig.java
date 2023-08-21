@@ -17,7 +17,7 @@ public class SquatGrowConfig implements ConfigData {
     public boolean debug = false;
 
     @Comment("Require hoe to allow growth")
-    public boolean requireHoe = true;
+    public boolean requireHoe = false;
 
 //    @Comment("Hoe takes damage on growth")
 //    public boolean hoeTakesDamage = true;
@@ -29,8 +29,12 @@ public class SquatGrowConfig implements ConfigData {
     @ConfigEntry.BoundedDiscrete(min = 0, max = 16)
     public int range = 3;
 
-    @Comment("Growth Chance")
+    @Comment("Growth chance")
     public double chance = 0.5;
+
+    @Comment("Sugarcane multiplier")
+    @ConfigEntry.BoundedDiscrete(min = 1, max = 16)
+    public int sugarcaneMultiplier = 4;
 
     @Comment("List of blocks to blacklist/whitelist from twerking, Tags can be used by using #minecraft:<tag_name> or #modid:<tag_name>")
     public List<String> ignoreList = new ArrayList<>(Arrays.asList(
@@ -41,10 +45,16 @@ public class SquatGrowConfig implements ConfigData {
             "minecraft:warped_nylium",
             "minecraft:crimson_nylium"
     ));
+    @Comment("Allow twerking in adventure mode, default true")
+    public boolean allowAdventureTwerking = true;
 
     @Comment("Enable Mystical Crops")
     public boolean enableMysticalCrops = true;
 
-    @Comment("Allow twerking in adventure mode, default true")
-    public boolean allowAdventureTwerking = true;
+    @Comment("Enable AE2 accelerator")
+    public boolean enableAE2Accelerator = true;
+
+    @Comment("AE2 growth multiplier")
+    @ConfigEntry.BoundedDiscrete(min = 1, max = 16)
+    public int ae2Multiplier = 4;
 }

@@ -59,6 +59,7 @@ public class SquatGrow {
 
     private static void onSetup() {
         CommonEvents.isMysticalLoaded = Platform.isModLoaded("mysticalagriculture");
+        CommonEvents.isAE2Loaded = Platform.isModLoaded("ae2");
     }
 
     /**
