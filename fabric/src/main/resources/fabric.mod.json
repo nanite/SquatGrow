@@ -19,6 +19,9 @@
       "dev.wuffs.squatgrow.SquatGrow::init"
     ]
   },
+  "mixins": [
+    "squatgrow.mixins.json"
+  ],
   "depends": {
     "fabric": "*",
     "minecraft": ">=1.20",

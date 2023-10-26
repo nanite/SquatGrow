@@ -37,6 +37,7 @@ public class SquatGrow {
     public static final Set<TagKey<Block>> tagCache = new HashSet<>();
     public static final Set<String> wildcardCache = new HashSet<>();
 
+
     public static void init() {
         configHolder = AutoConfig.register(SquatGrowConfig.class, YamlConfigSerializer::new);
         configHolder.registerLoadListener(SquatGrow::onConfigChanged);
@@ -44,7 +45,6 @@ public class SquatGrow {
         configHolder.load();
         config = configHolder.get();
 
-        TickEvent.PLAYER_POST.register(CommonEvents::onPlayerTick);
         LifecycleEvent.SETUP.register(SquatGrow::onSetup);
 
         ReloadListenerRegistry.register(PackType.SERVER_DATA, new ReloadHandler());
@@ -58,8 +58,8 @@ public class SquatGrow {
     }
 
     private static void onSetup() {
-        CommonEvents.isMysticalLoaded = Platform.isModLoaded("mysticalagriculture");
-        CommonEvents.isAE2Loaded = Platform.isModLoaded("ae2");
+        SquatAction.isMysticalLoaded = Platform.isModLoaded("mysticalagriculture");
+        SquatAction.isAE2Loaded = Platform.isModLoaded("ae2");
     }
 
     /**
