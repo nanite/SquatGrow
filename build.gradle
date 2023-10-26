@@ -1,7 +1,7 @@
 plugins {
     id "architectury-plugin" version "3.4-SNAPSHOT"
     id "dev.architectury.loom" version "1.2-SNAPSHOT" apply false
-    id "me.modmuss50.mod-publish-plugin" version "0.3.0"
+    id "me.modmuss50.mod-publish-plugin" version "0.3.5"
 }
 
 ext.isSnapshot = providers.environmentVariable("SNAPSHOT").map { it == "true" }.getOrElse(false)
@@ -27,7 +27,6 @@ allprojects {
     apply plugin: "java"
     apply plugin: "architectury-plugin"
     apply plugin: "maven-publish"
-    apply plugin: 'com.matthewprenger.cursegradle'
 
     archivesBaseName = rootProject.archives_base_name
     version = "${mod_version}+mc${minecraft_version}${isSnapshot ? '-SNAPSHOT' : ''}"
@@ -129,5 +128,6 @@ publishMods {
         repository = "${github_repo}"
         accessToken = providers.environmentVariable("GITHUB_TOKEN")
         commitish = providers.environmentVariable("GITHUB_SHA").orElse("dryRun")
+        tagName = providers.environmentVariable("GITHUB_REF_NAME").orElse("dryRun")
     }
 }
