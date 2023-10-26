@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [5.1.1]
+
+### Fixed
+
+- Fixed an issue causing the mod to cause world crashes when using mods like canary.
+
 ## [5.1.0]
 
 ### Possibly breaking
