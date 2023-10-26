@@ -37,7 +37,7 @@ public class SquatAction {
 
         boolean handContainsHoe = (player.getMainHandItem().is(ItemTags.HOES) | player.getOffhandItem().is(ItemTags.HOES));
         if (config.requireHoe && !handContainsHoe) return;
-        
+
         grow(level, (ServerPlayer) player);
     }
 

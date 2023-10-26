@@ -96,24 +96,3 @@ publishing {
         }
     }
 }
-
-if (ENV.CURSE_TOKEN) {
-    curseforge {
-        apiKey = ENV.CURSE_TOKEN
-        project {
-            id = project.curseforge_id
-            releaseType = "release"
-            addGameVersion "Fabric"
-            addGameVersion "Java 17"
-            addGameVersion "${minecraft_version}"
-            relations {
-                requiredDependency 'fabric-api'
-                requiredDependency 'architectury-api'
-                requiredDependency 'cloth-config'
-            }
-            mainArtifact(remapJar)
-            changelog = file("../CHANGELOG.md")
-            changelogType = 'markdown'
-        }
-    }
-}
