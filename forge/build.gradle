@@ -45,7 +45,7 @@ dependencies {
 
     modApi("me.shedaniel.cloth:cloth-config-forge:${rootProject.cloth_config_version}")
 
-    modRuntimeOnly("curse.maven:canary-665658:4668137")
+//    modRuntimeOnly("curse.maven:canary-665658:4668137")
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
