@@ -1,34 +1,29 @@
 package dev.wuffs.squatgrow;
 
+import dev.wuffs.squatgrow.actions.Action;
+import dev.wuffs.squatgrow.actions.ActionContext;
+import dev.wuffs.squatgrow.actions.Actions;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.tags.TagKey;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BoneMealItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.*;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+
+import java.util.Set;
 
 import static dev.wuffs.squatgrow.SquatGrow.config;
 
 public class SquatAction {
-    private static final TagKey<Block> MYSTICAL_TAG = TagKey.create(Registries.BLOCK, new ResourceLocation("mysticalagriculture", "crops"));
-    private static final TagKey<Block> AE2_TAG = TagKey.create(Registries.BLOCK, new ResourceLocation("ae2", "growth_acceleratable"));
-
-    public static boolean isMysticalLoaded = false;
-    public static boolean isAE2Loaded = false;
-
     public static void performAction(Level level, Player player) {
         if (level.isClientSide) return;
         if (!config.allowAdventureTwerking && ((ServerPlayer) player).gameMode.getGameModeForPlayer() == GameType.ADVENTURE) return;
@@ -44,55 +39,54 @@ public class SquatAction {
 
         var r = level.random;
 
+        // Actions
+        Set<Action> actions = Actions.get().getActions();
+
         for (int x = -config.range; x <= config.range; x++) {
             for (int z = -config.range; z <= config.range; z++) {
                 for (int y = -1; y <= 1; y++) {
-                    double randomValue = 0 + (1 - 0) * r.nextDouble();
-                    if (config.debug) {
-                        SquatGrow.getLogger().debug("Rand value:" + randomValue);
+                    double randomValue = 0 + 1 * r.nextDouble();
+                    if (randomValue < config.chance) {
+                        continue;
                     }
-                    if (config.chance >= randomValue) {
-                        boolean didGrow = false;
-                        BlockPos blockPos = new BlockPos(pos.getX() + x, pos.getY() + y, pos.getZ() + z);
-                        BlockState blockState = level.getBlockState(blockPos);
-                        Block block = blockState.getBlock();
-                        if (isMysticalLoaded && block.builtInRegistryHolder().tags().toList().contains(MYSTICAL_TAG) && config.enableMysticalCrops) {
-                            ((CropBlock) block).growCrops(level, blockPos, level.getBlockState(blockPos));
-                            didGrow = true;
-                        } else if (isAE2Loaded && block.builtInRegistryHolder().tags().toList().contains(AE2_TAG) && config.enableMysticalCrops) {
-                            SquatGrow.getLogger().debug("Ticking ae2 block: " + level.getBlockState(blockPos).getBlock().arch$registryName().toString() + " " + config.ae2Multiplier + " times");
-                            for (int i = 0; i < config.sugarcaneMultiplier; i++) {
-                                block.randomTick(level.getBlockState(blockPos), ((ServerLevel) level), blockPos, level.random);
-                            }
-                            didGrow = true;
-                        }
-                        if ((block instanceof BonemealableBlock || block instanceof SugarCaneBlock) && SquatGrow.allowTwerk(blockState)) {
-                            if (block instanceof SugarCaneBlock) {
-                                // Todo make this a loop with a config option for the multiplier
-                                SquatGrow.getLogger().debug("Ticking sugarcane block: " + config.sugarcaneMultiplier + " times");
-                                for (int i = 0; i < config.sugarcaneMultiplier; i++) {
-                                    block.randomTick(blockState, ((ServerLevel) level), blockPos, level.random);
-                                }
-                                didGrow = true;
-                            } else {
 
-                                BoneMealItem.growCrop(new ItemStack(Items.BONE_MEAL), level, blockPos);
-                                didGrow = true;
-                            }
-//                            ((ServerWorld) level).sendParticles((ServerPlayerEntity) player, ParticleTypes.HAPPY_VILLAGER, false, blockPos.getX() + 0.5D, blockPos.getY() + 0.5D, blockPos.getZ() + 0.1D, 10, 0.5, 0.5, 0.5, 3);
-                        }
-//
-                        if (didGrow) {
-                            addGrowthParticles((ServerLevel) level, blockPos, player);
+                    boolean didGrow = false;
+                    BlockPos offsetLocation = pos.offset(x, y, z);
+                    BlockState offsetState = level.getBlockState(offsetLocation);
+
+                    if (offsetState.isAir() || !SquatGrow.allowTwerk(offsetState)) {
+                        continue;
+                    }
+
+                    ActionContext context = new ActionContext(
+                            level,
+                            offsetLocation,
+                            offsetState,
+                            player.getMainHandItem(),
+                            player.getOffhandItem(),
+                            player
+                    );
+
+                    for (Action action : actions) {
+                        if (!action.canApply(context)) {
+                            continue;
                         }
 
-                        if (config.debug) {
-                            SquatGrow.getLogger().debug("====================================================");
-//                                SquatGrow.getLogger().debug("Block: " + Registry.BLOCK.getKey(block).toString());
-                            SquatGrow.getLogger().debug("Tags: " + block.builtInRegistryHolder().tags().toList().toString());
-                            SquatGrow.getLogger().debug("Pos: " + blockPos);
-                            SquatGrow.getLogger().debug("====================================================");
+                        didGrow = action.execute(context);
+                    }
+
+                    if (didGrow) {
+                        if (config.requireHoe && config.hoeTakesDamage) {
+                            ItemStack hoe = player.getMainHandItem();
+                            if (!hoe.is(ItemTags.HOES)) {
+                                hoe = player.getOffhandItem();
+                            }
+
+                            hoe.hurtAndBreak(1, player, (playerEntity) -> {
+                                playerEntity.broadcastBreakEvent(player.getUsedItemHand());
+                            });
                         }
+                        addGrowthParticles((ServerLevel) level, offsetLocation, player);
                     }
                 }
             }
@@ -105,7 +99,7 @@ public class SquatAction {
 
         BlockState blockstate = level.getBlockState(pos);
         if (!blockstate.isAir()) {
-            double d0 = 0.5D;
+            double d0 = 0.5D; // Gaz what was this for?
             double d1;
             if (blockstate.is(Blocks.WATER)) {
                 numParticles *= 3;
@@ -119,25 +113,30 @@ public class SquatAction {
             } else {
                 d1 = blockstate.getShape(level, pos).max(Direction.Axis.Y);
             }
-            level.sendParticles(player, ParticleTypes.HAPPY_VILLAGER, false, pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D, numParticles, 0.0D, 0.0D, 0.5, 0.5);
+
+            var randomPartialCount = random.nextInt(1, numParticles);
 
             // Something can cause this to mutate
             BlockPos immutablePos = pos.immutable();
-            for (int i = 0; i < numParticles; ++i) {
-                double d2 = random.nextGaussian() * 0.02D;
-                double d3 = random.nextGaussian() * 0.02D;
-                double d4 = random.nextGaussian() * 0.02D;
-                double d5 = 0.5D - d0;
-                double x = immutablePos.getX() + d5 + random.nextInt() * d0 * 2;
-                double y = immutablePos.getY() + random.nextInt() * d1;
-                double z = immutablePos.getZ() + d5 + random.nextInt() * d0 * 2;
+            for (int i = 0; i < randomPartialCount; ++i) {
+                double d2 = random.nextGaussian() * 0.2D;
+                double d3 = random.nextGaussian() * 0.2D;
+                double d4 = random.nextGaussian() * 0.2D;
+
+                var randomY = Mth.clamp(random.nextDouble(), 0.1, 0.5);
+
+                // Randomly place a particle somewhere within the blocks x and z
+                double x = immutablePos.getX() + Mth.clamp(random.nextDouble(), -1D, 1D);
+                double y = (immutablePos.getY() - .95D) + (d1 + randomY);
+                double z = immutablePos.getZ() + Mth.clamp(random.nextDouble(), -1D, 1D);
 
                 BlockState state = level.getBlockState(immutablePos);
                 if (!state.isAir()) {
                     level.sendParticles(player, ParticleTypes.HAPPY_VILLAGER, false, x, y, z, numParticles, d2, d3, d4, 0.5);
-                    level.playSound(null, immutablePos, SoundEvents.BONE_MEAL_USE, SoundSource.MASTER, 0.5F, 1.0F);
                 }
             }
+
+            level.playSound(null, immutablePos, SoundEvents.BONE_MEAL_USE, SoundSource.MASTER, 0.5F, 1.0F);
         }
     }
 }

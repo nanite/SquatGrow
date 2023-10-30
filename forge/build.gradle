@@ -46,6 +46,12 @@ dependencies {
     modApi("me.shedaniel.cloth:cloth-config-forge:${rootProject.cloth_config_version}")
 
 //    modRuntimeOnly("curse.maven:canary-665658:4668137")
+//    modRuntimeOnly("curse.maven:applied-energistics-2-223794:4783930")
+//    modRuntimeOnly("curse.maven:mystical-agriculture-246640:4802036")
+//    modRuntimeOnly("curse.maven:cucumber-272335:4825638")
+//    modRuntimeOnly("curse.maven:apotheosis-313970:4724390")
+//    modRuntimeOnly("curse.maven:placebo-283644:4723708")
+//    modRuntimeOnly("curse.maven:apothic-attributes-898963:4731488")
 
     common(project(path: ":common", configuration: "namedElements")) { transitive false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }

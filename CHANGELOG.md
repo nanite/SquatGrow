@@ -1,6 +1,20 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [5.2.0]
+
+### Added
+
+- An new action that allows the player to hold a grass block in their offhand to quickly squat to convert dirt to grass
+
+### Fixed
+
+- Fixed another crash causing clients to be disconnected from the server or crash in single player due to poor validation
+
+### Changed
+
+- Rewrote most of the mod to be more robust and extendable
+
 ## [5.1.1]
 
 ### Fixed
