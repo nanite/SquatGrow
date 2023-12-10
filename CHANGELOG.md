@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [6.0.0]
+
+- Ported to 1.20.4
+
 ## [5.2.0]
 
 ### Added
