@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "[49,)"
+loaderVersion = "[1,)"
 license="All rights reserved"
 
 [[mods]]
@@ -13,10 +13,13 @@ description='''
 Squat up and down to grow your plant
 '''
 
+[[mixins]]
+config = "squatgrow.mixins.json"
+
 [[dependencies.squatgrow]]
-modId = "forge"
+modId = "neoforge"
 mandatory = true
-versionRange = "[49,)"
+versionRange = "[1,)"
 ordering = "NONE"
 side = "BOTH"
 
