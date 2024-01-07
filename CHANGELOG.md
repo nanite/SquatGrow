@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [6.0.1]
+
+- Updated modloader versions
+
 ## [6.0.0]
 
 - Ported to 1.20.4
