@@ -3,23 +3,27 @@ package dev.wuffs.squatgrow;
 import dev.wuffs.squatgrow.actions.Action;
 import dev.wuffs.squatgrow.actions.ActionContext;
 import dev.wuffs.squatgrow.actions.Actions;
+import dev.wuffs.squatgrow.config.SquatGrowConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
+import org.apache.commons.lang3.tuple.Pair;
 
-import java.util.Set;
+import java.util.*;
 
 import static dev.wuffs.squatgrow.SquatGrow.config;
 
@@ -28,13 +32,84 @@ public class SquatAction {
         if (level.isClientSide) return;
         if (!config.allowAdventureTwerking && ((ServerPlayer) player).gameMode.getGameModeForPlayer() == GameType.ADVENTURE) return;
 
-        boolean handContainsHoe = (player.getMainHandItem().is(ItemTags.HOES) | player.getOffhandItem().is(ItemTags.HOES));
-        if (config.requireHoe && !handContainsHoe) return;
+        Pair<Boolean, List<ItemStack>> requirementsTest = passesRequirements(player);
+        if (!requirementsTest.getKey()) {
+            return;
+        }
 
-        grow(level, (ServerPlayer) player);
+        grow(level, (ServerPlayer) player, requirementsTest.getValue());
     }
 
-    public static void grow(Level level, ServerPlayer player) {
+    public static Pair<Boolean, List<ItemStack>> passesRequirements(Player player) {
+        List<ItemStack> itemsThatHandleDamage = new ArrayList<>();
+        // Legacy support, if this is enabled, the requirements system is disabled.
+        if (config.requireHoe) {
+            ItemStack mainHand = player.getMainHandItem();
+            if (mainHand.is(ItemTags.HOES)) {
+                itemsThatHandleDamage.add(mainHand);
+                return Pair.of(true, itemsThatHandleDamage);
+            }
+
+            ItemStack offHand = player.getOffhandItem();
+            if (offHand.is(ItemTags.HOES)) {
+                itemsThatHandleDamage.add(offHand);
+                return Pair.of(true, itemsThatHandleDamage);
+            }
+
+            return Pair.of(false, itemsThatHandleDamage);
+        }
+
+        SquatGrowConfig.Requirements requirements = config.requirements;
+        if (requirements.enabled) {
+            if (requirements.heldItemRequirement.isEmpty() && requirements.equipmentRequirement.isEmpty()) {
+                return Pair.of(true, itemsThatHandleDamage);
+            }
+
+            // Let's check the correct things. First, the lighter of the two checks
+            boolean passesEquipment = false;
+            if (!requirements.heldItemRequirement.isEmpty()) {
+                BitSet foundItems = new BitSet();
+                for (Map.Entry<EquipmentSlot, String> entry : requirements.equipmentRequirement.entrySet()) {
+                    ItemStack stack = player.getItemBySlot(entry.getKey());
+                    if (stack.isEmpty()) {
+                        continue;
+                    }
+
+                    // Now compare the item in the slot to the requirement
+                    if (stack.getItem().arch$registryName().toString().equals(entry.getValue())) {
+                        foundItems.set(entry.getKey().getIndex());
+                        itemsThatHandleDamage.add(stack);
+                    }
+                }
+
+                if (foundItems.cardinality() == requirements.heldItemRequirement.size()) {
+                    passesEquipment = true;
+                }
+            }
+
+            if (!requirements.equipmentRequirement.isEmpty() && !passesEquipment) {
+                return Pair.of(false, itemsThatHandleDamage); // If the equipment check is required and failed, we can return false
+            }
+
+            // Now, the heavier of the two checks
+            // We can only have gotten here if heldItemRequirement is not empty so no need to check again
+            BitSet foundItems = new BitSet();
+            for (String item : requirements.heldItemRequirement) {
+                ResourceLocation itemLocation = new ResourceLocation(item);
+                if (player.getMainHandItem().getItem().arch$registryName().equals(itemLocation) || player.getOffhandItem().getItem().arch$registryName().equals(itemLocation)) {
+                    foundItems.set(itemLocation.hashCode());
+                    itemsThatHandleDamage.add(player.getMainHandItem());
+                }
+            }
+
+            var passes = foundItems.cardinality() == requirements.heldItemRequirement.size();
+            return Pair.of(passes, itemsThatHandleDamage);
+        }
+
+        return Pair.of(true, itemsThatHandleDamage);
+    }
+
+    public static void grow(Level level, ServerPlayer player, List<ItemStack> itemsToDamage) {
         BlockPos pos = player.blockPosition();
 
         var r = level.random;
@@ -75,17 +150,16 @@ public class SquatAction {
                         didGrow = action.execute(context);
                     }
 
-                    if (didGrow) {
-                        if (config.requireHoe && config.hoeTakesDamage) {
-                            ItemStack hoe = player.getMainHandItem();
-                            if (!hoe.is(ItemTags.HOES)) {
-                                hoe = player.getOffhandItem();
-                            }
-
-                            hoe.hurtAndBreak(1, player, (playerEntity) -> {
+                    if ((config.hoeTakesDamage || config.requirements.requiredItemTakesDamage) && didGrow && !itemsToDamage.isEmpty()) {
+                        var durabilityToApply = config.hoeTakesDamage ? 1 : config.requirements.durabilityDamage;
+                        for (ItemStack item : itemsToDamage) {
+                            item.hurtAndBreak(durabilityToApply, player, (playerEntity) -> {
                                 playerEntity.broadcastBreakEvent(player.getUsedItemHand());
                             });
                         }
+                    }
+
+                    if (didGrow) {
                         addGrowthParticles((ServerLevel) level, offsetLocation, player);
                     }
                 }
