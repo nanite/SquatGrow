@@ -29,7 +29,7 @@ public class SquatGrowConfig implements ConfigData {
     public int range = 3;
 
     @Comment("Growth chance")
-    public double chance = 0.5;
+    public float chance = 0.5f;
 
     @Comment("Don't use! Use randomTickMultiplier instead, this is here for backwards compatibility")
     @ConfigEntry.BoundedDiscrete(min = 1, max = 16)

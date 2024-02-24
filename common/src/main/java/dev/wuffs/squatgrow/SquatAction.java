@@ -46,7 +46,7 @@ public class SquatAction {
             for (int z = -config.range; z <= config.range; z++) {
                 for (int y = -1; y <= 1; y++) {
                     double randomValue = 0 + 1 * r.nextDouble();
-                    if (randomValue < config.chance) {
+                    if (config.chance < randomValue) {
                         continue;
                     }
 

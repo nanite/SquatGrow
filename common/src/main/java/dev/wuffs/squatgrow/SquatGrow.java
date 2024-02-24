@@ -50,6 +50,7 @@ public class SquatGrow {
         @Override
         public void onResourceManagerReload(ResourceManager manager) {
             configHolder.load();
+            config = configHolder.get();
         }
     }
 
