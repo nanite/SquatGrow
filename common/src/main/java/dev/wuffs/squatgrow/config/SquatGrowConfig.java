@@ -5,8 +5,12 @@ import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
 import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Comment;
+import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
+import java.beans.Transient;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -86,5 +90,10 @@ public class SquatGrowConfig implements ConfigData {
 
         @Comment("Amount of damage to take when used to grow")
         public int durabilityDamage = 1;
+
+        @Comment(
+                "Enchantment required to grow, leave empty to disable\n"
+        )
+        public String requiredEnchantment = "";
     }
 }
