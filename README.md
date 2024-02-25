@@ -90,15 +90,15 @@ useWhitelist: false
 
 The requirements system is a new system that allows you to require certain items to be held or equipment to be worn to grow crops.
 
-| Option | Description                                                                                              | Default   |
-| ------ |----------------------------------------------------------------------------------------------------------|-----------|
-| `requirements` | The requirements system for growing crops                                                               | See above |
-| `requirements.enabled` | Whether or not to enable the requirements system                                                        | `false`   |
-| `requirements.heldItemRequirement` | A list of items that are required to be held to grow crops                                           | `[]`      |
-| `requirements.equipmentRequirement` | A map of equipment slots to items that are required to be worn to grow crops                        | `{}`      |
-| `requirements.requiredEnchantment` | The enchantment that is required to grow crops                                                         | `''`      |
-| `requirements.requiredItemTakesDamage` | Whether or not the required item takes damage when growing crops                                    | `false`   |
-| `requirements.durabilityDamage` | The amount of damage to take when growing crops                                                        | `1`       |
+| Option | Description                                                                                              | Default |
+| ------ |----------------------------------------------------------------------------------------------------------|---------|
+| `requirements` | The requirements system for growing crops                                                               | N/a     |
+| `requirements.enabled` | Whether or not to enable the requirements system                                                        | `false` |
+| `requirements.heldItemRequirement` | A list of items that are required to be held to grow crops                                           | `[]`    |
+| `requirements.equipmentRequirement` | A map of equipment slots to items that are required to be worn to grow crops                        | `{}`    |
+| `requirements.requiredEnchantment` | The enchantment that is required to grow crops                                                         | `''`    |
+| `requirements.requiredItemTakesDamage` | Whether or not the required item takes damage when growing crops                                    | `false` |
+| `requirements.durabilityDamage` | The amount of damage to take when growing crops                                                        | `1`     |
 
 ##### Integration Options
 
