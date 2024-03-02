@@ -5,20 +5,26 @@ import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
 import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Comment;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 
+import java.beans.Transient;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 @Config(name = SquatGrow.MOD_ID + "-common")
 public class SquatGrowConfig implements ConfigData {
     @Comment("Enable debug logging")
     public boolean debug = false;
 
-    @Comment("Require hoe to allow growth")
+    @Comment("Require hoe to allow growth, LEGACY, PLEASE SWITCH TO THE NEW SYSTEM, SEE REQUIREMENTS")
     public boolean requireHoe = false;
 
-    @Comment("Hoe takes damage on growth")
+    @Comment("Hoe takes damage on growth, LEGACY, PLEASE SWITCH TO THE NEW SYSTEM, SEE REQUIREMENTS")
     public boolean hoeTakesDamage = false;
 
     @Comment("Use whitelist instead of blacklist, default false")
@@ -29,7 +35,7 @@ public class SquatGrowConfig implements ConfigData {
     public int range = 3;
 
     @Comment("Growth chance")
-    public double chance = 0.5;
+    public float chance = 0.5f;
 
     @Comment("Don't use! Use randomTickMultiplier instead, this is here for backwards compatibility")
     @ConfigEntry.BoundedDiscrete(min = 1, max = 16)
@@ -64,4 +70,30 @@ public class SquatGrowConfig implements ConfigData {
 
     @Comment("When the player is holding a grass block in their offhand, they will be able to randomly convert dirt into grass")
     public boolean enableDirtToGrass = true;
+
+    @ConfigEntry.Category("requirements")
+    @Comment("Requirements for growing")
+    public Requirements requirements = new Requirements();
+
+    public static class Requirements {
+        @Comment("Enabled the new requirements system")
+        public boolean enabled = true;
+
+        @Comment("List of blocks that require a hoe to grow, leave empty to disable")
+        public List<String> heldItemRequirement = new ArrayList<>();
+
+        @Comment("Map of equipment slots to items required to grow, leave empty to disable")
+        public Map<EquipmentSlot, String> equipmentRequirement = Map.of();
+
+        @Comment("Durability based items take damage when used to grow")
+        public boolean requiredItemTakesDamage = false;
+
+        @Comment("Amount of damage to take when used to grow")
+        public int durabilityDamage = 1;
+
+        @Comment(
+                "Enchantment required to grow, leave empty to disable\n"
+        )
+        public String requiredEnchantment = "";
+    }
 }
