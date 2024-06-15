@@ -13,7 +13,7 @@ import java.util.function.BooleanSupplier;
 import static dev.wuffs.squatgrow.SquatGrow.config;
 
 public class AE2Action extends RandomTickableAction {
-    private static final TagKey<Block> AE2_TAG = TagKey.create(Registries.BLOCK, new ResourceLocation("ae2", "growth_acceleratable"));
+    private static final TagKey<Block> AE2_TAG = TagKey.create(Registries.BLOCK, ResourceLocation.fromNamespaceAndPath("ae2", "growth_acceleratable"));
 
     @Override
     public BooleanSupplier isAvailable() {

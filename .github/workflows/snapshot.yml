@@ -12,6 +12,7 @@ jobs:
     uses: nanite/workflows/.github/workflows/base-java.yml@v1
     secrets:
       nanite-token: ${{ secrets.NANITE_DEPLOY }}
+      java-version: 21
     with:
       use-snapshots: true
       gradle-tasks: build publish

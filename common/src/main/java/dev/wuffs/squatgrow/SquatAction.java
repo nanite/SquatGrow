@@ -6,6 +6,8 @@ import dev.wuffs.squatgrow.actions.Actions;
 import dev.wuffs.squatgrow.config.SquatGrowConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -14,11 +16,13 @@ import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
@@ -66,7 +70,7 @@ public class SquatAction {
             // Let's check the correct things. First, the lighter of the two checks
             boolean passesEquipment = false;
             if (!requirements.equipmentRequirement.isEmpty()) {
-                var matchingEquipment = matchingEquipmentItem(player, computedRequirements.equipmentRequirementStacks(), computedRequirements.equipmentRequirementTags());
+                var matchingEquipment = matchingEquipmentItem(player.level(), player, computedRequirements.equipmentRequirementStacks(), computedRequirements.equipmentRequirementTags());
 
                 // This is safe to do as it will only increment if the equipment is found, and you can only have one item per slot
                 if (matchingEquipment.size() == requirements.equipmentRequirement.size()) {
@@ -143,9 +147,7 @@ public class SquatAction {
                     if ((config.hoeTakesDamage || config.requirements.requiredItemTakesDamage) && didGrow && !itemsToDamage.isEmpty()) {
                         var durabilityToApply = config.hoeTakesDamage ? 1 : config.requirements.durabilityDamage;
                         for (ItemStack item : itemsToDamage) {
-                            item.hurtAndBreak(durabilityToApply, player, (playerEntity) -> {
-                                playerEntity.broadcastBreakEvent(player.getUsedItemHand());
-                            });
+                            item.hurtAndBreak(durabilityToApply, player, player.getUsedItemHand() == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
                         }
                     }
 
@@ -209,24 +211,24 @@ public class SquatAction {
         var offHand = player.getOffhandItem();
 
         // Check the main hand first
-        var matchingItem = compareItemToLists(mainHand, itemStacks, itemTags);
+        var matchingItem = compareItemToLists(player.level(), mainHand, itemStacks, itemTags);
         if (!matchingItem.isEmpty()) {
             return matchingItem;
         }
 
         // Check the offhand next
-        return compareItemToLists(offHand, itemStacks, itemTags);
+        return compareItemToLists(player.level(), offHand, itemStacks, itemTags);
     }
 
-    private static ItemStack compareItemToLists(ItemStack stack, List<ItemStack> itemStacks, List<TagKey<Item>> itemTags) {
+    private static ItemStack compareItemToLists(Level level, ItemStack stack, List<ItemStack> itemStacks, List<TagKey<Item>> itemTags) {
         for (ItemStack item : itemStacks) {
-            if (itemStackMatches(stack, item)) {
+            if (itemStackMatches(level, stack, item)) {
                 return stack;
             }
         }
 
         for (TagKey<Item> tag : itemTags) {
-            if (itemStackMatches(stack, tag)) {
+            if (itemStackMatches(level, stack, tag)) {
                 return stack;
             }
         }
@@ -234,19 +236,19 @@ public class SquatAction {
         return ItemStack.EMPTY;
     }
 
-    private static List<ItemStack> matchingEquipmentItem(Player player, Map<EquipmentSlot, ItemStack> equipmentStacks, Map<EquipmentSlot, TagKey<Item>> equipmentTags) {
+    private static List<ItemStack> matchingEquipmentItem(Level level, Player player, Map<EquipmentSlot, ItemStack> equipmentStacks, Map<EquipmentSlot, TagKey<Item>> equipmentTags) {
         List<ItemStack> matchedItems = new ArrayList<>();
 
         for (Map.Entry<EquipmentSlot, ItemStack> entry : equipmentStacks.entrySet()) {
             ItemStack itemBySlot = player.getItemBySlot(entry.getKey());
-            if (itemStackMatches(itemBySlot, entry.getValue())) {
+            if (itemStackMatches(level, itemBySlot, entry.getValue())) {
                 matchedItems.add(itemBySlot);
             }
         }
 
         for (Map.Entry<EquipmentSlot, TagKey<Item>> entry : equipmentTags.entrySet()) {
             ItemStack itemBySlot = player.getItemBySlot(entry.getKey());
-            if (itemStackMatches(itemBySlot, entry.getValue())) {
+            if (itemStackMatches(level, itemBySlot, entry.getValue())) {
                 matchedItems.add(itemBySlot);
             }
         }
@@ -254,17 +256,31 @@ public class SquatAction {
         return matchedItems;
     }
 
-    private static boolean itemStackMatches(ItemStack stack, TagKey<Item> tag) {
+    private static boolean itemStackMatches(Level level, ItemStack stack, TagKey<Item> tag) {
         if (computedEnchantment != null && stack.isEnchantable()) {
-            return stack.is(tag) && EnchantmentHelper.getEnchantments(stack).containsKey(computedEnchantment);
+            var enchantmentValue = computedEnchantment.get(level);
+            if (enchantmentValue != null && stack.is(tag)) {
+                ItemEnchantments itemEnchantments = stack.get(DataComponents.ENCHANTMENTS);
+                if (itemEnchantments != null) {
+                    return stack.is(tag) && itemEnchantments.getLevel(Holder.direct(enchantmentValue)) > 0;
+                }
+            }
         }
 
         return stack.is(tag);
     }
 
-    private static boolean itemStackMatches(ItemStack stack, ItemStack item) {
+    private static boolean itemStackMatches(Level level, ItemStack stack, ItemStack item) {
         if (computedEnchantment != null && stack.isEnchantable()) {
-            return stack.is(item.getItem()) && EnchantmentHelper.getEnchantments(stack).containsKey(computedEnchantment);
+            var enchantmentValue = computedEnchantment.get(level);
+            if (enchantmentValue != null) {
+                if (stack.is(item.getItem())) {
+                    ItemEnchantments itemEnchantments = stack.get(DataComponents.ENCHANTMENTS);
+                    if (itemEnchantments != null) {
+                        return itemEnchantments.getLevel(Holder.direct(enchantmentValue)) > 0;
+                    }
+                }
+            }
         }
 
         return stack.is(item.getItem());

@@ -13,7 +13,7 @@ import java.util.function.BooleanSupplier;
 import static dev.wuffs.squatgrow.SquatGrow.config;
 
 public class MysticalAction extends GrowCropAction {
-    private static final TagKey<Block> MYSTICAL_TAG = TagKey.create(Registries.BLOCK, new ResourceLocation("mysticalagriculture", "crops"));
+    private static final TagKey<Block> MYSTICAL_TAG = TagKey.create(Registries.BLOCK, ResourceLocation.fromNamespaceAndPath("mysticalagriculture", "crops"));
 
     @Override
     public BooleanSupplier isAvailable() {

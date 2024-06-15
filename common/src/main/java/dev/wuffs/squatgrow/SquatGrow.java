@@ -8,8 +8,11 @@ import dev.wuffs.squatgrow.config.SquatGrowConfig;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.ConfigHolder;
 import me.shedaniel.autoconfig.serializer.YamlConfigSerializer;
+import net.minecraft.core.Holder;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -21,6 +24,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.tuple.Pair;
@@ -32,6 +36,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class SquatGrow {
@@ -45,7 +50,7 @@ public class SquatGrow {
     public static final Set<String> wildcardCache = new HashSet<>();
 
     public static ComputedRequirements computedRequirements = null;
-    public static Enchantment computedEnchantment = null;
+    public static LazyLevelDependentValue<Enchantment> computedEnchantment = null;
 
     public static void init() {
         configHolder = AutoConfig.register(SquatGrowConfig.class, YamlConfigSerializer::new);
@@ -81,7 +86,7 @@ public class SquatGrow {
 
         tagCache.addAll(newConfig.ignoreList.stream()
                 .filter(e -> e.contains("#"))
-                .map(e -> TagKey.create(Registries.BLOCK, new ResourceLocation(e.replace("#", ""))))
+                .map(e -> TagKey.create(Registries.BLOCK, ResourceLocation.tryParse(e.replace("#", ""))))
                 .collect(Collectors.toSet()));
 
         wildcardCache.addAll(newConfig.ignoreList.stream().filter(e -> e.contains("*")).map(e -> e.split(":")[0])
@@ -95,11 +100,11 @@ public class SquatGrow {
         // This is kinda gross, but it does work so /shrug
         Map<EquipmentSlot, ItemStack> equipmentRequirementStacks = equipmentRequirement.entrySet().stream()
                 .filter(e -> !e.getValue().contains("#"))
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> new ItemStack(BuiltInRegistries.ITEM.get(new ResourceLocation(e.getValue())))));
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.tryParse(e.getValue())))));
 
         Map<EquipmentSlot, TagKey<Item>> equipmentRequirementTags = equipmentRequirement.entrySet().stream()
                 .filter(e -> e.getValue().contains("#"))
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> TagKey.create(Registries.ITEM, new ResourceLocation(e.getValue().replace("#", "")))));
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> TagKey.create(Registries.ITEM, ResourceLocation.tryParse(e.getValue().replace("#", "")))));
 
         computedRequirements = new ComputedRequirements(
                 computedHeldEntries.getLeft(),
@@ -110,13 +115,20 @@ public class SquatGrow {
 
         // This makes me want to puke, defaulted registries suck
         if (!newConfig.requirements.requiredEnchantment.isEmpty()) {
-            ResourceLocation enchantmentRl = new ResourceLocation(newConfig.requirements.requiredEnchantment);
-            Enchantment enchantment = BuiltInRegistries.ENCHANTMENT.get(enchantmentRl);
-            // Default for the registry is fortune, we need to make that if we get fortune it matches the enchantmentRl
-            if (enchantment != Enchantments.BLOCK_FORTUNE || enchantmentRl.equals(new ResourceLocation("minecraft:fortune"))) {
-                // If the enchantment is not fortune or it is but we want fortune, set it
-                computedEnchantment = enchantment;
-            }
+            ResourceLocation enchantmentRl = ResourceLocation.tryParse(newConfig.requirements.requiredEnchantment);
+            computedEnchantment = new LazyLevelDependentValue<>(accessor -> {
+                var key = ResourceKey.create(Registries.ENCHANTMENT, enchantmentRl);
+
+                try {
+                    RegistryAccess registryAccess = accessor.registryAccess();
+                    Holder.Reference<Enchantment> enchantmentHolder = registryAccess.lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(key);
+                    return enchantmentHolder.value();
+                } catch (Exception e) {
+                    LOGGER.error("Enchantment {} not found, falling back to null", enchantmentRl);
+                    computedEnchantment = null;
+                    return null;
+                }
+            });
         } else {
             computedEnchantment = null;
         }
@@ -144,14 +156,36 @@ public class SquatGrow {
     private static Pair<List<ItemStack>, List<TagKey<Item>>> computeItemsAndTagsFromStringList(List<String> list) {
         List<ItemStack> stacks = list.stream()
                 .filter(e -> !e.contains("#"))
-                .map(e -> new ItemStack(BuiltInRegistries.ITEM.get(new ResourceLocation(e))))
+                .map(e -> new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.tryParse(e))))
                 .toList();
 
         List<TagKey<Item>> tags = list.stream()
                 .filter(e -> e.contains("#"))
-                .map(e -> TagKey.create(Registries.ITEM, new ResourceLocation(e.replace("#", ""))))
+                .map(e -> TagKey.create(Registries.ITEM, ResourceLocation.tryParse(e.replace("#", ""))))
                 .toList();
 
         return Pair.of(stacks, tags);
+    }
+
+    public static class LazyLevelDependentValue<T> {
+        @Nullable
+        private T value = null;
+        private Function<LevelAccessor, T> supplier;
+
+        public LazyLevelDependentValue(Function<LevelAccessor, T> supplier) {
+            this.supplier = supplier;
+        }
+
+        public T get(LevelAccessor accessor) {
+            if (value == null) {
+                value = supplier.apply(accessor);
+            }
+
+            if (value == null) {
+                throw new IllegalStateException("Value not initialized");
+            }
+
+            return value;
+        }
     }
 }
