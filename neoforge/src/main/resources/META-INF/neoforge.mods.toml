@@ -1,5 +1,5 @@
 modLoader = "javafml"
-loaderVersion = "[1,)"
+loaderVersion = "[2,)"
 license="All rights reserved"
 
 [[mods]]
@@ -19,20 +19,20 @@ config = "squatgrow.mixins.json"
 [[dependencies.squatgrow]]
 modId = "neoforge"
 required = true
-versionRange = "[1,)"
+versionRange = "[2,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.squatgrow]]
 modId = "minecraft"
 required = true
-versionRange = "[1.20.4,)"
+versionRange = "[1.21,)"
 ordering = "NONE"
 side = "BOTH"
 
 [[dependencies.squatgrow]]
 modId = "architectury"
 required = true
-versionRange = "[11.0.8,)"
+versionRange = "[13.0.1,)"
 ordering = "AFTER"
 side = "BOTH"
