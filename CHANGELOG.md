@@ -1,6 +1,10 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [21.0.2]
+
+- Fixed neoforge version issue
+
 ## [21.0.1]
 
 - Fixed neoforge crash
