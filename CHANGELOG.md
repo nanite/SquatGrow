@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [21.0.3]
+
+- Updated neo and fabric
+- Added short grass to the default config
+
+
 ## [21.0.2]
 
 - Fixed neoforge version issue

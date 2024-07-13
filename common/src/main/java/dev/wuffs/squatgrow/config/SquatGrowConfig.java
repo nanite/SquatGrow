@@ -49,6 +49,7 @@ public class SquatGrowConfig implements ConfigData {
     public List<String> ignoreList = new ArrayList<>(Arrays.asList(
             "minecraft:grass_block",
             "minecraft:grass",
+            "minecraft:short_grass",
             "minecraft:tall_grass",
             "minecraft:netherrack",
             "minecraft:warped_nylium",
