@@ -7,7 +7,7 @@ public class SquatPlatformImpl {
     public static void setSquatGrowEnabled(ServerPlayer player) {
         boolean isEnabled = isSquatGrowEnabled(player);
         player.setData(SquatGrowNeoForge.SQUAT_GROW_ENABLED.get(), !isEnabled);
-        player.sendSystemMessage(Component.literal("Squat Grow " + (!isEnabled ? "Enabled" : "Disabled")), true);
+        player.sendSystemMessage(Component.translatable(!isEnabled ? "squatgrow.enabled" : "squatgrow.disabled"), true);
     }
 
     public static boolean isSquatGrowEnabled(ServerPlayer player) {

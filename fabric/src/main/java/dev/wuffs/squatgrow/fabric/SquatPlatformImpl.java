@@ -8,7 +8,7 @@ public class SquatPlatformImpl {
         var isEnabled = isSquatGrowEnabled(player);
 
         player.setAttached(SquatGrowFabric.SQUAT_GROW_ENABLED, !isEnabled);
-        player.sendSystemMessage(Component.literal("Squat Grow " + (!isEnabled ? "Enabled" : "Disabled")), true);
+        player.sendSystemMessage(Component.translatable(!isEnabled ? "squatgrow.enabled" : "squatgrow.disabled"), true);
     }
 
     public static boolean isSquatGrowEnabled(ServerPlayer player) {
