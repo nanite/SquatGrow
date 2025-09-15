@@ -36,7 +36,13 @@ import static dev.wuffs.squatgrow.SquatGrow.*;
 public class SquatAction {
     public static void performAction(Level level, Player player) {
         if (level.isClientSide) return;
-        if (!config.allowAdventureTwerking && ((ServerPlayer) player).gameMode.getGameModeForPlayer() == GameType.ADVENTURE) return;
+
+        var serverPlayer = (ServerPlayer) player;
+        if (!config.allowAdventureTwerking && serverPlayer.gameMode.getGameModeForPlayer() == GameType.ADVENTURE) return;
+
+        if (!SquatPlatform.isSquatGrowEnabled(serverPlayer)) {
+            return;
+        }
 
         Pair<Boolean, List<ItemStack>> requirementsTest = passesRequirements(player);
         if (!requirementsTest.getKey()) {
