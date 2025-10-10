@@ -16,7 +16,7 @@
   "environment": "*",
   "entrypoints": {
     "main": [
-      "dev.wuffs.squatgrow.SquatGrow::init"
+      "dev.wuffs.squatgrow.fabric.SquatGrowFabric"
     ]
   },
   "mixins": [

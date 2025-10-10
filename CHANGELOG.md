@@ -1,6 +1,12 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [21.1.1]
+
+### Added
+* Key binding to enable/disable the squat to grow functionality.
+  * Default key is `U` but can be changed in the controls menu.
+
 ## [21.01.0]
 
 - 1.21.1 update
