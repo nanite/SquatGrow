@@ -8,11 +8,11 @@ import dev.wuffs.squatgrow.network.SquatGrowEnabledPacket;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.input.KeyEvent;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.lwjgl.glfw.GLFW;
 
 public class SquatGrowClient {
-    private static final KeyMapping.Category SQUATGROW_CATEGORY = KeyMapping.Category.register(ResourceLocation.fromNamespaceAndPath(SquatGrow.MOD_ID, "keys"));
+    private static final KeyMapping.Category SQUATGROW_CATEGORY = KeyMapping.Category.register(Identifier.fromNamespaceAndPath(SquatGrow.MOD_ID, "keys"));
 
     private static final KeyMapping TOGGLE_KEY = new KeyMapping(
             "key.squatgrow.toggle",

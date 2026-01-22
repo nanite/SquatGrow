@@ -4,7 +4,7 @@ import dev.architectury.platform.Platform;
 import dev.wuffs.squatgrow.actions.ActionContext;
 import dev.wuffs.squatgrow.actions.RandomTickableAction;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 
@@ -13,7 +13,7 @@ import java.util.function.BooleanSupplier;
 import static dev.wuffs.squatgrow.SquatGrow.config;
 
 public class AE2Action extends RandomTickableAction {
-    private static final TagKey<Block> AE2_TAG = TagKey.create(Registries.BLOCK, ResourceLocation.fromNamespaceAndPath("ae2", "growth_acceleratable"));
+    private static final TagKey<Block> AE2_TAG = TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath("ae2", "growth_acceleratable"));
 
     @Override
     public BooleanSupplier isAvailable() {

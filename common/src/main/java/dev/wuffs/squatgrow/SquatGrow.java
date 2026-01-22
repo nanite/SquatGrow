@@ -17,7 +17,7 @@ import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -69,7 +69,7 @@ public class SquatGrow {
         }
 
         LifecycleEvent.SETUP.register(SquatGrow::onSetup);
-        ReloadListenerRegistry.register(PackType.SERVER_DATA, new ReloadHandler(), ResourceLocation.fromNamespaceAndPath(MOD_ID, "squatgrow_config_updater"));
+        ReloadListenerRegistry.register(PackType.SERVER_DATA, new ReloadHandler(), Identifier.fromNamespaceAndPath(MOD_ID, "squatgrow_config_updater"));
 
         NetworkManager.registerReceiver(
             NetworkManager.Side.C2S,
@@ -101,7 +101,7 @@ public class SquatGrow {
 
         tagCache.addAll(newConfig.ignoreList.stream()
                 .filter(e -> e.contains("#"))
-                .map(e -> TagKey.create(Registries.BLOCK, ResourceLocation.tryParse(e.replace("#", ""))))
+                .map(e -> TagKey.create(Registries.BLOCK, Identifier.tryParse(e.replace("#", ""))))
                 .collect(Collectors.toSet()));
 
         wildcardCache.addAll(newConfig.ignoreList.stream().filter(e -> e.contains("*")).map(e -> e.split(":")[0])
@@ -115,11 +115,11 @@ public class SquatGrow {
         // This is kinda gross, but it does work so /shrug
         Map<EquipmentSlot, ItemStack> equipmentRequirementStacks = equipmentRequirement.entrySet().stream()
                 .filter(e -> !e.getValue().contains("#"))
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.tryParse(e.getValue())).orElseThrow())));
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> new ItemStack(BuiltInRegistries.ITEM.get(Identifier.tryParse(e.getValue())).orElseThrow())));
 
         Map<EquipmentSlot, TagKey<Item>> equipmentRequirementTags = equipmentRequirement.entrySet().stream()
                 .filter(e -> e.getValue().contains("#"))
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> TagKey.create(Registries.ITEM, ResourceLocation.tryParse(e.getValue().replace("#", "")))));
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> TagKey.create(Registries.ITEM, Identifier.tryParse(e.getValue().replace("#", "")))));
 
         computedRequirements = new ComputedRequirements(
                 computedHeldEntries.getLeft(),
@@ -130,7 +130,7 @@ public class SquatGrow {
 
         // This makes me want to puke, defaulted registries suck
         if (!newConfig.requirements.requiredEnchantment.isEmpty()) {
-            ResourceLocation enchantmentRl = ResourceLocation.tryParse(newConfig.requirements.requiredEnchantment);
+            Identifier enchantmentRl = Identifier.tryParse(newConfig.requirements.requiredEnchantment);
             computedEnchantment = new LazyLevelDependentValue<>(accessor -> {
                 var key = ResourceKey.create(Registries.ENCHANTMENT, enchantmentRl);
 
@@ -156,12 +156,12 @@ public class SquatGrow {
     }
 
     private static boolean isBlockInIgnoreList(BlockState state) {
-        ResourceLocation resourceLocation = state.getBlock().arch$registryName();
-        if (resourceLocation == null) {
+        Identifier Identifier = state.getBlock().arch$registryName();
+        if (Identifier == null) {
             return false;
         }
 
-        if (config.ignoreList.contains(resourceLocation.toString()) || wildcardCache.contains(resourceLocation.getNamespace())) {
+        if (config.ignoreList.contains(Identifier.toString()) || wildcardCache.contains(Identifier.getNamespace())) {
             return true;
         }
 
@@ -171,7 +171,7 @@ public class SquatGrow {
     private static Pair<List<ItemStack>, List<TagKey<Item>>> computeItemsAndTagsFromStringList(List<String> list) {
         List<ItemStack> stacks = list.stream()
                 .filter(e -> !e.contains("#"))
-                .map(e -> BuiltInRegistries.ITEM.get(ResourceLocation.tryParse(e)))
+                .map(e -> BuiltInRegistries.ITEM.get(Identifier.tryParse(e)))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .map(ItemStack::new)
@@ -179,7 +179,7 @@ public class SquatGrow {
 
         List<TagKey<Item>> tags = list.stream()
                 .filter(e -> e.contains("#"))
-                .map(e -> TagKey.create(Registries.ITEM, ResourceLocation.tryParse(e.replace("#", ""))))
+                .map(e -> TagKey.create(Registries.ITEM, Identifier.tryParse(e.replace("#", ""))))
                 .toList();
 
         return Pair.of(stacks, tags);

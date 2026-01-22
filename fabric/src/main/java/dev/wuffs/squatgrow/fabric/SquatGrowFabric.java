@@ -5,7 +5,7 @@ import dev.wuffs.squatgrow.SquatGrow;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentRegistry;
 import net.fabricmc.fabric.api.attachment.v1.AttachmentType;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
 import static dev.wuffs.squatgrow.SquatGrow.MOD_ID;
 
@@ -15,7 +15,7 @@ public class SquatGrowFabric implements ModInitializer {
         .initializer(() -> true)
         .persistent(Codec.BOOL)
         .copyOnDeath()
-        .buildAndRegister(ResourceLocation.fromNamespaceAndPath(MOD_ID, "squat_grow_enabled"));
+        .buildAndRegister(Identifier.fromNamespaceAndPath(MOD_ID, "squat_grow_enabled"));
 
     @Override
     public void onInitialize() {
