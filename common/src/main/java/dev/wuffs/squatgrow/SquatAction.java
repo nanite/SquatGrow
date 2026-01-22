@@ -177,7 +177,7 @@ public class SquatAction {
                 numParticles *= 3;
                 d1 = 1.0D;
                 d0 = 3.0D;
-            } else if (blockstate.isSolidRender(level, pos)) {
+            } else if (blockstate.isSolidRender()) {
                 pos = pos.above();
                 numParticles *= 3;
                 d0 = 3.0D;

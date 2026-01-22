@@ -1,6 +1,13 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [21.2.0]
+
+### Changed
+
+- Ported to 1.21.2/3
+- The config is now a .json5 file to support comments.
+
 ## [21.1.1]
 
 ### Added

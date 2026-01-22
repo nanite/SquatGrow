@@ -12,6 +12,7 @@ import dev.wuffs.squatgrow.config.SquatGrowConfig;
 import dev.wuffs.squatgrow.network.SquatGrowEnabledPacket;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.ConfigHolder;
+import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
 import me.shedaniel.autoconfig.serializer.YamlConfigSerializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -31,6 +32,7 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
@@ -43,6 +45,7 @@ import org.slf4j.LoggerFactory;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -61,7 +64,7 @@ public class SquatGrow {
     public static LazyLevelDependentValue<Enchantment> computedEnchantment = null;
 
     public static void init() {
-        configHolder = AutoConfig.register(SquatGrowConfig.class, YamlConfigSerializer::new);
+        configHolder = AutoConfig.register(SquatGrowConfig.class, JanksonConfigSerializer::new);
         configHolder.registerLoadListener(SquatGrow::onConfigChanged);
         configHolder.registerSaveListener(SquatGrow::onConfigChanged);
         configHolder.load();
@@ -118,7 +121,7 @@ public class SquatGrow {
         // This is kinda gross, but it does work so /shrug
         Map<EquipmentSlot, ItemStack> equipmentRequirementStacks = equipmentRequirement.entrySet().stream()
                 .filter(e -> !e.getValue().contains("#"))
-                .collect(Collectors.toMap(Map.Entry::getKey, e -> new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.tryParse(e.getValue())))));
+                .collect(Collectors.toMap(Map.Entry::getKey, e -> new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.tryParse(e.getValue())).orElseThrow())));
 
         Map<EquipmentSlot, TagKey<Item>> equipmentRequirementTags = equipmentRequirement.entrySet().stream()
                 .filter(e -> e.getValue().contains("#"))
@@ -174,7 +177,10 @@ public class SquatGrow {
     private static Pair<List<ItemStack>, List<TagKey<Item>>> computeItemsAndTagsFromStringList(List<String> list) {
         List<ItemStack> stacks = list.stream()
                 .filter(e -> !e.contains("#"))
-                .map(e -> new ItemStack(BuiltInRegistries.ITEM.get(ResourceLocation.tryParse(e))))
+                .map(e -> BuiltInRegistries.ITEM.get(ResourceLocation.tryParse(e)))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(ItemStack::new)
                 .toList();
 
         List<TagKey<Item>> tags = list.stream()
@@ -188,7 +194,7 @@ public class SquatGrow {
     public static class LazyLevelDependentValue<T> {
         @Nullable
         private T value = null;
-        private Function<LevelAccessor, T> supplier;
+        private final Function<LevelAccessor, T> supplier;
 
         public LazyLevelDependentValue(Function<LevelAccessor, T> supplier) {
             this.supplier = supplier;
