@@ -14,7 +14,7 @@ import java.util.function.Supplier;
 public class SquatGrowNeoForge {
     private static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES = DeferredRegister.create(NeoForgeRegistries.ATTACHMENT_TYPES, SquatGrow.MOD_ID);
     public static final Supplier<AttachmentType<Boolean>> SQUAT_GROW_ENABLED = ATTACHMENT_TYPES.register(
-            "squat_grow_enabled", () -> AttachmentType.builder(() -> true).serialize(Codec.BOOL).build()
+            "squat_grow_enabled", () -> AttachmentType.builder(() -> true).serialize(Codec.BOOL.fieldOf("squat_grow_enabled")).build()
     );
 
     public SquatGrowNeoForge(IEventBus modBus) {
