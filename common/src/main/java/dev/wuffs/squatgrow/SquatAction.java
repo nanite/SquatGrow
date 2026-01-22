@@ -8,6 +8,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -204,7 +205,7 @@ public class SquatAction {
 
                 BlockState state = level.getBlockState(immutablePos);
                 if (!state.isAir()) {
-                    level.sendParticles(player, ParticleTypes.HAPPY_VILLAGER, false, x, y, z, numParticles, d2, d3, d4, 0.5);
+                    level.sendParticles(player, ParticleTypes.HAPPY_VILLAGER, false, true, x, y, z, numParticles, d2, d3, d4, 0.5);
                 }
             }
 

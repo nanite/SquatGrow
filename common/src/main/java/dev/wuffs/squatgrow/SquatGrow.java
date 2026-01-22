@@ -75,7 +75,7 @@ public class SquatGrow {
         }
 
         LifecycleEvent.SETUP.register(SquatGrow::onSetup);
-        ReloadListenerRegistry.register(PackType.SERVER_DATA, new ReloadHandler());
+        ReloadListenerRegistry.register(PackType.SERVER_DATA, new ReloadHandler(), ResourceLocation.fromNamespaceAndPath(MOD_ID, "squatgrow_config_updater"));
 
         NetworkManager.registerReceiver(
             NetworkManager.Side.C2S,
