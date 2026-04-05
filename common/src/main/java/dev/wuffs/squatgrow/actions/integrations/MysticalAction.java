@@ -1,6 +1,6 @@
 package dev.wuffs.squatgrow.actions.integrations;
 
-import dev.architectury.platform.Platform;
+import dev.wuffs.squatgrow.Platform;
 import dev.wuffs.squatgrow.actions.ActionContext;
 import dev.wuffs.squatgrow.actions.GrowCropAction;
 import net.minecraft.core.registries.Registries;
@@ -17,7 +17,7 @@ public class MysticalAction extends GrowCropAction {
 
     @Override
     public BooleanSupplier isAvailable() {
-        return () -> Platform.isModLoaded("mysticalagriculture") && config.enableMysticalCrops;
+        return () -> Platform.INSTANCE.isModLoaded("mysticalagriculture") && config.enableMysticalCrops;
     }
 
     @Override

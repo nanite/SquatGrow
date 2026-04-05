@@ -1,24 +1,14 @@
 package dev.wuffs.squatgrow;
 
-import dev.architectury.event.events.common.LifecycleEvent;
-import dev.architectury.networking.NetworkManager;
-import dev.architectury.platform.Platform;
-import dev.architectury.registry.ReloadListenerRegistry;
 import dev.wuffs.squatgrow.actions.Actions;
 import dev.wuffs.squatgrow.config.ComputedRequirements;
 import dev.wuffs.squatgrow.config.SquatGrowConfig;
-import dev.wuffs.squatgrow.network.SquatGrowEnabledPacket;
-import me.shedaniel.autoconfig.AutoConfig;
-import me.shedaniel.autoconfig.ConfigHolder;
-import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
-import net.fabricmc.api.EnvType;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.Identifier;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
@@ -64,19 +54,8 @@ public class SquatGrow {
         configHolder.load();
         config = configHolder.get();
 
-        if (Platform.getEnv() == EnvType.CLIENT) {
-            SquatGrowClient.init();
-        }
-
         LifecycleEvent.SETUP.register(SquatGrow::onSetup);
         ReloadListenerRegistry.register(PackType.SERVER_DATA, new ReloadHandler(), Identifier.fromNamespaceAndPath(MOD_ID, "squatgrow_config_updater"));
-
-        NetworkManager.registerReceiver(
-            NetworkManager.Side.C2S,
-            SquatGrowEnabledPacket.TYPE,
-            SquatGrowEnabledPacket.CODEC,
-            (packet, context) -> context.queue(() -> SquatPlatform.setSquatGrowEnabled((ServerPlayer) context.getPlayer()))
-        );
     }
 
     static class ReloadHandler implements ResourceManagerReloadListener {

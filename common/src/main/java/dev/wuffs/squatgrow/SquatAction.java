@@ -41,7 +41,7 @@ public class SquatAction {
         var serverPlayer = (ServerPlayer) player;
         if (!config.allowAdventureTwerking && serverPlayer.gameMode.getGameModeForPlayer() == GameType.ADVENTURE) return;
 
-        if (!SquatPlatform.isSquatGrowEnabled(serverPlayer)) {
+        if (!Platform.INSTANCE.isSquatGrowEnabled(serverPlayer)) {
             return;
         }
 
@@ -55,17 +55,6 @@ public class SquatAction {
 
     public static Pair<Boolean, List<ItemStack>> passesRequirements(Player player) {
         List<ItemStack> itemsThatHandleDamage = new ArrayList<>();
-        // Legacy support, if this is enabled, the requirements system is disabled.
-        if (config.requireHoe) {
-            // Meh, lists aren't free but emptylist is a constant so it's fine
-            var matchedItem = getMatchingHeldItem(player, Collections.emptyList(), List.of(ItemTags.HOES));
-            if (!matchedItem.isEmpty()) {
-                itemsThatHandleDamage.add(matchedItem);
-                return Pair.of(true, itemsThatHandleDamage);
-            }
-
-            return Pair.of(false, itemsThatHandleDamage);
-        }
 
         SquatGrowConfig.Requirements requirements = config.requirements;
         if (requirements.enabled && SquatGrow.computedRequirements != null) {
@@ -113,7 +102,7 @@ public class SquatAction {
     public static void grow(Level level, ServerPlayer player, List<ItemStack> itemsToDamage) {
         BlockPos pos = player.blockPosition();
 
-        var r = level.random;
+        var r = level.getRandom();
 
         // Actions
         Set<Action> actions = Actions.get().getActions();
@@ -151,8 +140,8 @@ public class SquatAction {
                         didGrow = action.execute(context);
                     }
 
-                    if ((config.hoeTakesDamage || config.requirements.requiredItemTakesDamage) && didGrow && !itemsToDamage.isEmpty()) {
-                        var durabilityToApply = config.hoeTakesDamage ? 1 : config.requirements.durabilityDamage;
+                    if ((config.requirements.requiredItemTakesDamage) && didGrow && !itemsToDamage.isEmpty()) {
+                        var durabilityToApply = config.requirements.durabilityDamage;
                         for (ItemStack item : itemsToDamage) {
                             item.hurtAndBreak(durabilityToApply, player, player.getUsedItemHand() == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
                         }
@@ -167,7 +156,7 @@ public class SquatAction {
     }
 
     private static void addGrowthParticles(ServerLevel level, BlockPos pos, ServerPlayer player) {
-        var random = level.random;
+        var random = level.getRandom();
         int numParticles = 2;
 
         BlockState blockstate = level.getBlockState(pos);

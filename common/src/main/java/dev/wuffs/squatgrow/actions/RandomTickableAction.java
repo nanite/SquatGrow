@@ -37,6 +37,6 @@ public class RandomTickableAction implements Action {
 
     public int getMultiplier(ActionContext context) {
         // If the old legacy config is using the default value of 4, use the new randomTickMultiplier
-        return config.sugarcaneMultiplier == 4 ? config.randomTickMultiplier : config.sugarcaneMultiplier;
+        return config.randomTickMultiplier;
     }
 }

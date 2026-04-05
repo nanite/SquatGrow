@@ -21,12 +21,6 @@ public class SquatGrowConfig implements ConfigData {
     @Comment("Enable debug logging")
     public boolean debug = false;
 
-    @Comment("Require hoe to allow growth, LEGACY, PLEASE SWITCH TO THE NEW SYSTEM, SEE REQUIREMENTS")
-    public boolean requireHoe = false;
-
-    @Comment("Hoe takes damage on growth, LEGACY, PLEASE SWITCH TO THE NEW SYSTEM, SEE REQUIREMENTS")
-    public boolean hoeTakesDamage = false;
-
     @Comment("Use whitelist instead of blacklist, default false")
     public boolean useWhitelist = false;
 
@@ -36,10 +30,6 @@ public class SquatGrowConfig implements ConfigData {
 
     @Comment("Growth chance")
     public float chance = 0.5f;
-
-    @Comment("Don't use! Use randomTickMultiplier instead, this is here for backwards compatibility")
-    @ConfigEntry.BoundedDiscrete(min = 1, max = 16)
-    public int sugarcaneMultiplier = 4;
 
     @Comment("Random tick multiplier, this is the amount of times the mod will call the randomTick method on the block for each block in the range")
     @ConfigEntry.BoundedDiscrete(min = 1, max = 16)

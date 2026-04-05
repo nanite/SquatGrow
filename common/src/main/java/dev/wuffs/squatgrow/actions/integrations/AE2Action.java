@@ -1,6 +1,6 @@
 package dev.wuffs.squatgrow.actions.integrations;
 
-import dev.architectury.platform.Platform;
+import dev.wuffs.squatgrow.Platform;
 import dev.wuffs.squatgrow.actions.ActionContext;
 import dev.wuffs.squatgrow.actions.RandomTickableAction;
 import net.minecraft.core.registries.Registries;
@@ -17,7 +17,7 @@ public class AE2Action extends RandomTickableAction {
 
     @Override
     public BooleanSupplier isAvailable() {
-        return () -> Platform.isModLoaded("ae2") && config.enableAE2Accelerator;
+        return () -> Platform.INSTANCE.isModLoaded("ae2") && config.enableAE2Accelerator;
     }
 
     @Override
