@@ -1,5 +1,6 @@
 package dev.wuffs.squatgrow;
 
+import dev.nanite.library.client.platform.PlatformClient;
 import dev.wuffs.squatgrow.network.SquatGrowEnabledPacket;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.resources.Identifier;
@@ -15,6 +16,6 @@ public class SquatGrowClient {
     );
 
     public static void onToggleBtnPressed() {
-        Platform.INSTANCE.sendPacketToServer(new SquatGrowEnabledPacket());
+        PlatformClient.INSTANCE.sendPacketToServer(new SquatGrowEnabledPacket());
     }
 }

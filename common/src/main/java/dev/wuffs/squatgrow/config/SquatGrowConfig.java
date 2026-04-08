@@ -1,90 +1,118 @@
 package dev.wuffs.squatgrow.config;
 
+import com.mojang.datafixers.util.Either;
+import dev.nanite.library.core.config.Config;
+import dev.nanite.library.core.config.ConfigValue;
+import dev.nanite.library.core.config.ConfigValueGroup;
+import dev.nanite.library.core.config.values.BooleanConfigValue;
+import dev.nanite.library.core.config.values.FloatConfigValue;
+import dev.nanite.library.core.config.values.IntConfigValue;
 import dev.wuffs.squatgrow.SquatGrow;
-import me.shedaniel.autoconfig.ConfigData;
-import me.shedaniel.autoconfig.annotation.Config;
-import me.shedaniel.autoconfig.annotation.ConfigEntry;
-import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Comment;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 
-import java.beans.Transient;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
+import java.util.stream.Stream;
 
-@Config(name = SquatGrow.MOD_ID + "-common")
-public class SquatGrowConfig implements ConfigData {
-    @Comment("Enable debug logging")
-    public boolean debug = false;
+public interface SquatGrowConfig {
+    Config config = Config.commonConfig(SquatGrow.MOD_ID);
 
-    @Comment("Use whitelist instead of blacklist, default false")
-    public boolean useWhitelist = false;
+    BooleanConfigValue debug = config
+            .booleanValue("debug", false)
+            .comments("Enable debug logging");
 
-    @Comment("Range of effect, warning: this can cause lag if set too high")
-    @ConfigEntry.BoundedDiscrete(min = 0, max = 16)
-    public int range = 3;
+    BooleanConfigValue useWhitelist = config
+            .booleanValue("useWhitelist", false)
+            .comments("Use whitelist instead of blacklist, default false");
 
-    @Comment("Growth chance")
-    public float chance = 0.5f;
+    IntConfigValue range = config
+            .intValue("range", 3)
+            .comments("Range of effect, warning: this can cause lag if set too high")
+            .min(0)
+            .max(16);
 
-    @Comment("Random tick multiplier, this is the amount of times the mod will call the randomTick method on the block for each block in the range")
-    @ConfigEntry.BoundedDiscrete(min = 1, max = 16)
-    public int randomTickMultiplier = 4;
+    FloatConfigValue chance = config
+            .floatValue("chance", 0.5f)
+            .comments("Chance for a block to grow, between 0 and 1")
+            .min(0f)
+            .max(1f);
 
-    @Comment("List of blocks to blacklist/whitelist from twerking, Tags can be used by using #minecraft:<tag_name> or #modid:<tag_name>")
-    public List<String> ignoreList = new ArrayList<>(Arrays.asList(
-            "minecraft:grass_block",
-            "minecraft:grass",
-            "minecraft:short_grass",
-            "minecraft:tall_grass",
-            "minecraft:netherrack",
-            "minecraft:warped_nylium",
-            "minecraft:crimson_nylium"
-    ));
+    IntConfigValue randomTickMultiplier = config
+            .intValue("randomTickMultiplier", 4)
+            .comments("Random tick multiplier, this is the amount of times the mod will call the randomTick method on the block for each block in the range")
+            .min(1)
+            .max(16);
 
-    @Comment("Allow twerking in adventure mode, default true")
-    public boolean allowAdventureTwerking = true;
+    ConfigValue<List<Either<Identifier, TagKey<Block>>>> ignoreList = config
+            .idOrTagListValue("ignoreList", Registries.BLOCK, Stream.of(
+                    Blocks.GRASS_BLOCK,
+                    Blocks.SHORT_GRASS,
+                    Blocks.TALL_GRASS,
+                    Blocks.NETHERRACK,
+                    Blocks.WARPED_NYLIUM,
+                    Blocks.CRIMSON_NYLIUM
+            ).map(e -> Either.<Identifier, TagKey<Block>>left(e.builtInRegistryHolder().key().identifier())).toList())
+            .comments("List of blocks to blacklist/whitelist from twerking, Tags can be used by using #minecraft:<tag_name> or #modid:<tag_name>");
 
-    @Comment("Enable Mystical Crops")
-    public boolean enableMysticalCrops = true;
+    BooleanConfigValue allowAdventureTwerking = config
+            .booleanValue("allowAdventureTwerking", true)
+            .comments("Allow twerking in adventure mode, default true");
 
-    @Comment("Enable AE2 accelerator")
-    public boolean enableAE2Accelerator = true;
+    BooleanConfigValue enableMysticalCrops = config
+            .booleanValue("enableMysticalCrops", true)
+            .comments("Enable Mystical Crops growth support");
 
-    @Comment("AE2 growth multiplier, only available if AE2 is present")
-    @ConfigEntry.BoundedDiscrete(min = 1, max = 16)
-    public int ae2Multiplier = 4;
+    BooleanConfigValue enableAE2Accelerator = config
+            .booleanValue("enableAE2Accelerator", true)
+            .comments("Enable AE2 crystal growth support, only available if AE2 is present");
 
-    @Comment("When the player is holding a grass block in their offhand, they will be able to randomly convert dirt into grass")
-    public boolean enableDirtToGrass = true;
+    IntConfigValue ae2Multiplier = config
+            .intValue("ae2Multiplier", 4)
+            .comments("AE2 growth multiplier, only available if AE2 is present")
+            .min(1)
+            .max(16);
 
-    @ConfigEntry.Category("requirements")
-    @Comment("Requirements for growing")
-    public Requirements requirements = new Requirements();
+    BooleanConfigValue enableDirtToGrass = config
+            .booleanValue("enableDirtToGrass", true)
+            .comments("When the player is holding a grass block in their offhand, they will be able to randomly convert dirt into grass");
 
-    public static class Requirements {
-        @Comment("Enabled the new requirements system")
-        public boolean enabled = true;
+    ConfigValueGroup requirementsGroup = config
+            .group("requirements")
+            .comments("Requirements for growing");
 
-        @Comment("List of blocks that require a hoe to grow, leave empty to disable")
-        public List<String> heldItemRequirement = new ArrayList<>();
-
-        @Comment("Map of equipment slots to items required to grow, leave empty to disable")
-        public Map<EquipmentSlot, String> equipmentRequirement = Map.of();
-
-        @Comment("Durability based items take damage when used to grow")
-        public boolean requiredItemTakesDamage = false;
-
-        @Comment("Amount of damage to take when used to grow")
-        public int durabilityDamage = 1;
-
-        @Comment(
-                "Enchantment required to grow, leave empty to disable\n"
-        )
-        public String requiredEnchantment = "";
-    }
+//    interface Requirements {
+//        BooleanConfigValue enabled = requirementsGroup
+//                .booleanValue("enabled", false)
+//                .comments("Enable requirement checking for when a block can grow via squatting.");
+//
+//        BooleanConfigValue itemTakesDamage = requirementsGroup
+//                .booleanValue("itemTakesDamage", false)
+//                .comments("Whether the required item should take damage when used to grow a block.");
+//
+//        FloatConfigValue durabilityDamage = requirementsGroup
+//                .floatValue("durabilityDamage", 1f)
+//                .comments("The amount of durability damage the required item takes when used to grow a block.");
+//
+//
+//    }
+//
+////    @Comment("List of blocks that require a hoe to grow, leave empty to disable")
+////    public List<String> heldItemRequirement = new ArrayList<>();
+//
+//    @Comment("Map of equipment slots to items required to grow, leave empty to disable")
+//    public Map<EquipmentSlot, String> equipmentRequirement = Map.of();
+//
+//    @Comment("Durability based items take damage when used to grow")
+//    public boolean requiredItemTakesDamage = false;
+//
+//    @Comment("Amount of damage to take when used to grow")
+//    public int durabilityDamage = 1;
+//
+//    @Comment(
+//            "Enchantment required to grow, leave empty to disable\n"
+//    )
+//    public String requiredEnchantment = "";
 }

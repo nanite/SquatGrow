@@ -2,10 +2,10 @@ package dev.wuffs.squatgrow.actions.special;
 
 import dev.wuffs.squatgrow.actions.Action;
 import dev.wuffs.squatgrow.actions.ActionContext;
+import dev.wuffs.squatgrow.config.SquatGrowConfig;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 
-import static dev.wuffs.squatgrow.SquatGrow.config;
 import java.util.function.BooleanSupplier;
 
 /**
@@ -15,7 +15,7 @@ import java.util.function.BooleanSupplier;
 public class DirtToGrassAction implements Action {
     @Override
     public BooleanSupplier isAvailable() {
-        return () -> config.enableDirtToGrass;
+        return SquatGrowConfig.enableDirtToGrass::get;
     }
 
     @Override

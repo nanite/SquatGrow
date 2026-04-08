@@ -8,21 +8,17 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
@@ -32,16 +28,16 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
 
-import static dev.wuffs.squatgrow.SquatGrow.*;
+import static dev.wuffs.squatgrow.SquatGrow.computedEnchantment;
 
 public class SquatAction {
     public static void performAction(Level level, Player player) {
         if (level.isClientSide()) return;
 
         var serverPlayer = (ServerPlayer) player;
-        if (!config.allowAdventureTwerking && serverPlayer.gameMode.getGameModeForPlayer() == GameType.ADVENTURE) return;
+        if (!SquatGrowConfig.allowAdventureTwerking.get() && serverPlayer.gameMode.getGameModeForPlayer() == GameType.ADVENTURE) return;
 
-        if (!Platform.INSTANCE.isSquatGrowEnabled(serverPlayer)) {
+        if (!SquatGrowPlatform.INSTANCE.isSquatGrowEnabled(serverPlayer)) {
             return;
         }
 
@@ -56,44 +52,44 @@ public class SquatAction {
     public static Pair<Boolean, List<ItemStack>> passesRequirements(Player player) {
         List<ItemStack> itemsThatHandleDamage = new ArrayList<>();
 
-        SquatGrowConfig.Requirements requirements = config.requirements;
-        if (requirements.enabled && SquatGrow.computedRequirements != null) {
-            // Easier to compare the originals than it is to compare the computed ones
-            if (requirements.heldItemRequirement.isEmpty() && requirements.equipmentRequirement.isEmpty()) {
-                return Pair.of(true, itemsThatHandleDamage);
-            }
-
-            // Let's check the correct things. First, the lighter of the two checks
-            boolean passesEquipment = false;
-            if (!requirements.equipmentRequirement.isEmpty()) {
-                var matchingEquipment = matchingEquipmentItem(player.level(), player, computedRequirements.equipmentRequirementStacks(), computedRequirements.equipmentRequirementTags());
-
-                // This is safe to do as it will only increment if the equipment is found, and you can only have one item per slot
-                if (matchingEquipment.size() == requirements.equipmentRequirement.size()) {
-                    itemsThatHandleDamage.addAll(matchingEquipment);
-                    passesEquipment = true;
-                }
-            }
-
-            if (!requirements.equipmentRequirement.isEmpty() && !passesEquipment) {
-                return Pair.of(false, itemsThatHandleDamage); // If the equipment check is required and failed, we can return false
-            }
-
-            // Now, the heavier of the two checks
-            // We can only have gotten here if heldItemRequirement is not empty so no need to check again
-            boolean passedHeldItem = false;
-            var matchingHeldItem = getMatchingHeldItem(player, computedRequirements.heldItemRequirementStacks(), computedRequirements.heldItemRequirementTags());
-            if (!matchingHeldItem.isEmpty()) {
-                itemsThatHandleDamage.add(matchingHeldItem);
-                passedHeldItem = true;
-            }
-
-            if (!requirements.heldItemRequirement.isEmpty() && !passedHeldItem) {
-                return Pair.of(false, itemsThatHandleDamage); // If the held item check is required and failed, we can return false
-            }
-
-            return Pair.of(true, itemsThatHandleDamage); // If we got here, we passed both checks
-        }
+//        SquatGrowConfig.Requirements requirements = config.requirements;
+//        if (requirements.enabled && SquatGrow.computedRequirements != null) {
+//            // Easier to compare the originals than it is to compare the computed ones
+//            if (requirements.heldItemRequirement.isEmpty() && requirements.equipmentRequirement.isEmpty()) {
+//                return Pair.of(true, itemsThatHandleDamage);
+//            }
+//
+//            // Let's check the correct things. First, the lighter of the two checks
+//            boolean passesEquipment = false;
+//            if (!requirements.equipmentRequirement.isEmpty()) {
+//                var matchingEquipment = matchingEquipmentItem(player.level(), player, computedRequirements.equipmentRequirementStacks(), computedRequirements.equipmentRequirementTags());
+//
+//                // This is safe to do as it will only increment if the equipment is found, and you can only have one item per slot
+//                if (matchingEquipment.size() == requirements.equipmentRequirement.size()) {
+//                    itemsThatHandleDamage.addAll(matchingEquipment);
+//                    passesEquipment = true;
+//                }
+//            }
+//
+//            if (!requirements.equipmentRequirement.isEmpty() && !passesEquipment) {
+//                return Pair.of(false, itemsThatHandleDamage); // If the equipment check is required and failed, we can return false
+//            }
+//
+//            // Now, the heavier of the two checks
+//            // We can only have gotten here if heldItemRequirement is not empty so no need to check again
+//            boolean passedHeldItem = false;
+//            var matchingHeldItem = getMatchingHeldItem(player, computedRequirements.heldItemRequirementStacks(), computedRequirements.heldItemRequirementTags());
+//            if (!matchingHeldItem.isEmpty()) {
+//                itemsThatHandleDamage.add(matchingHeldItem);
+//                passedHeldItem = true;
+//            }
+//
+//            if (!requirements.heldItemRequirement.isEmpty() && !passedHeldItem) {
+//                return Pair.of(false, itemsThatHandleDamage); // If the held item check is required and failed, we can return false
+//            }
+//
+//            return Pair.of(true, itemsThatHandleDamage); // If we got here, we passed both checks
+//        }
 
         // Nothing is required, so we can return true
         return Pair.of(true, Collections.emptyList());
@@ -107,11 +103,12 @@ public class SquatAction {
         // Actions
         Set<Action> actions = Actions.get().getActions();
 
-        for (int x = -config.range; x <= config.range; x++) {
-            for (int z = -config.range; z <= config.range; z++) {
+        var range = SquatGrowConfig.range.get();
+        for (int x = -range; x <= range; x++) {
+            for (int z = -range; z <= range; z++) {
                 for (int y = -1; y <= 1; y++) {
                     double randomValue = 0 + 1 * r.nextDouble();
-                    if (config.chance < randomValue) {
+                    if (SquatGrowConfig.chance.get() < randomValue) {
                         continue;
                     }
 
@@ -140,12 +137,12 @@ public class SquatAction {
                         didGrow = action.execute(context);
                     }
 
-                    if ((config.requirements.requiredItemTakesDamage) && didGrow && !itemsToDamage.isEmpty()) {
-                        var durabilityToApply = config.requirements.durabilityDamage;
-                        for (ItemStack item : itemsToDamage) {
-                            item.hurtAndBreak(durabilityToApply, player, player.getUsedItemHand() == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
-                        }
-                    }
+//                    if ((config.requirements.requiredItemTakesDamage) && didGrow && !itemsToDamage.isEmpty()) {
+//                        var durabilityToApply = config.requirements.durabilityDamage;
+//                        for (ItemStack item : itemsToDamage) {
+//                            item.hurtAndBreak(durabilityToApply, player, player.getUsedItemHand() == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
+//                        }
+//                    }
 
                     if (didGrow) {
                         addGrowthParticles((ServerLevel) level, offsetLocation, player);

@@ -19,6 +19,10 @@ allprojects {
         options.release = 25
     }
 
+    repositories {
+        mavenLocal()
+    }
+
     idea {
         module {
             downloadSources = true

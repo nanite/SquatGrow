@@ -1,12 +1,13 @@
 package dev.wuffs.squatgrow.actions;
 
 import com.google.common.collect.ImmutableSet;
-import dev.wuffs.squatgrow.actions.integrations.MysticalAction;
 import dev.wuffs.squatgrow.actions.integrations.AE2Action;
+import dev.wuffs.squatgrow.actions.integrations.MysticalAction;
 import dev.wuffs.squatgrow.actions.special.DirtToGrassAction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -15,39 +16,30 @@ public enum Actions {
     INSTANCE;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(Actions.class);
-
-    ImmutableSet<Action> actions;
-    final Set<Supplier<Action>> possibleActions = new HashSet<>();
+    private final Set<Action> actions = Collections.synchronizedSet(new HashSet<>());
 
     Actions() {
-        register(RandomTickableAction::new);
-        register(BoneMealAction::new);
+    }
+
+    public static void init() {
+        Actions.get().register(RandomTickableAction::new);
+        Actions.get().register(BoneMealAction::new);
 
         // Special actions
-        register(DirtToGrassAction::new);
+        Actions.get().register(DirtToGrassAction::new);
 
         // Register integrations
-        register(MysticalAction::new);
-        register(AE2Action::new);
+        Actions.get().register(MysticalAction::new);
+        Actions.get().register(AE2Action::new);
+    }
+
+    public void register(Action action) {
+        this.actions.add(action);
+        LOGGER.info("Registered action: {}", action.getClass().getSimpleName());
     }
 
     public void register(Supplier<Action> action) {
-        this.possibleActions.add(action);
-    }
-
-    public void setup() {
-        Set<Action> actions = new HashSet<>();
-        for (Supplier<Action> action : this.possibleActions) {
-            // Lazy load the action
-            Action actualAction = action.get();
-            if (actualAction.isAvailable().getAsBoolean()) {
-                actions.add(actualAction);
-                LOGGER.info("Registered action: {}", action.getClass().getSimpleName());
-            }
-        }
-
-        // Create an immutable set
-        this.actions = ImmutableSet.copyOf(actions);
+        this.register(action.get());
     }
 
     public static Actions get() {
@@ -55,6 +47,6 @@ public enum Actions {
     }
 
     public ImmutableSet<Action> getActions() {
-        return actions;
+        return ImmutableSet.copyOf(this.actions);
     }
 }

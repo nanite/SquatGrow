@@ -32,6 +32,10 @@ configurations {
     runtimeClasspath.extendsFrom localRuntime
 }
 
+dependencies {
+    implementation("dev.nanite.mods:nanite-library-neoforge:26.1.1.1")
+}
+
 java {
     withSourcesJar()
 }
