@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file.
 - Ported to 26.1+
 - We now require Nanite Library
   - Configs are now `json5` and better documented
+  - If Nanite Library is not yet on Modrinth, you can get it from [CurseForge](https://www.curseforge.com/minecraft/mc-mods/nanite-library/files/all?page=1&pageSize=20&showAlphaFiles=hide)
 - Migrated off of Architectury
 - Migrated off of Cloth Config
 - Requirements system has been reworked to be easier to understand and work with
