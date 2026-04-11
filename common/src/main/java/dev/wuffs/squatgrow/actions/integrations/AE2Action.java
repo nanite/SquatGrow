@@ -1,8 +1,9 @@
 package dev.wuffs.squatgrow.actions.integrations;
 
-import dev.architectury.platform.Platform;
+import dev.nanite.library.platform.Platform;
 import dev.wuffs.squatgrow.actions.ActionContext;
 import dev.wuffs.squatgrow.actions.RandomTickableAction;
+import dev.wuffs.squatgrow.config.SquatGrowConfig;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
@@ -10,14 +11,12 @@ import net.minecraft.world.level.block.Block;
 
 import java.util.function.BooleanSupplier;
 
-import static dev.wuffs.squatgrow.SquatGrow.config;
-
 public class AE2Action extends RandomTickableAction {
     private static final TagKey<Block> AE2_TAG = TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath("ae2", "growth_acceleratable"));
 
     @Override
     public BooleanSupplier isAvailable() {
-        return () -> Platform.isModLoaded("ae2") && config.enableAE2Accelerator;
+        return () -> Platform.INSTANCE.isModLoaded("ae2") && SquatGrowConfig.enableAE2Accelerator.get();
     }
 
     @Override
@@ -27,6 +26,6 @@ public class AE2Action extends RandomTickableAction {
 
     @Override
     public int getMultiplier(ActionContext context) {
-        return config.ae2Multiplier;
+        return SquatGrowConfig.ae2Multiplier.get();
     }
 }

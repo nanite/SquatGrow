@@ -1,5 +1,6 @@
 package dev.wuffs.squatgrow.actions;
 
+import dev.wuffs.squatgrow.config.SquatGrowConfig;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.CactusBlock;
@@ -7,8 +8,6 @@ import net.minecraft.world.level.block.StemBlock;
 import net.minecraft.world.level.block.SugarCaneBlock;
 
 import java.util.function.BooleanSupplier;
-
-import static dev.wuffs.squatgrow.SquatGrow.config;
 
 public class RandomTickableAction implements Action {
     @Override
@@ -37,6 +36,6 @@ public class RandomTickableAction implements Action {
 
     public int getMultiplier(ActionContext context) {
         // If the old legacy config is using the default value of 4, use the new randomTickMultiplier
-        return config.sugarcaneMultiplier == 4 ? config.randomTickMultiplier : config.sugarcaneMultiplier;
+        return SquatGrowConfig.randomTickMultiplier.get();
     }
 }

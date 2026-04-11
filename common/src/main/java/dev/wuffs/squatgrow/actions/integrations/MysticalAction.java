@@ -1,8 +1,9 @@
 package dev.wuffs.squatgrow.actions.integrations;
 
-import dev.architectury.platform.Platform;
+import dev.nanite.library.platform.Platform;
 import dev.wuffs.squatgrow.actions.ActionContext;
 import dev.wuffs.squatgrow.actions.GrowCropAction;
+import dev.wuffs.squatgrow.config.SquatGrowConfig;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
@@ -10,14 +11,12 @@ import net.minecraft.world.level.block.Block;
 
 import java.util.function.BooleanSupplier;
 
-import static dev.wuffs.squatgrow.SquatGrow.config;
-
 public class MysticalAction extends GrowCropAction {
     private static final TagKey<Block> MYSTICAL_TAG = TagKey.create(Registries.BLOCK, Identifier.fromNamespaceAndPath("mysticalagriculture", "crops"));
 
     @Override
     public BooleanSupplier isAvailable() {
-        return () -> Platform.isModLoaded("mysticalagriculture") && config.enableMysticalCrops;
+        return () -> Platform.INSTANCE.isModLoaded("mysticalagriculture") && SquatGrowConfig.enableMysticalCrops.get();
     }
 
     @Override

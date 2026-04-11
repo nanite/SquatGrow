@@ -38,35 +38,75 @@ Get the mod on [CurseForge](https://www.curseforge.com/minecraft/mc-mods/squat-g
 
 ## Configuration
 
-The configuration file is located at `config/squatgrow-common.yaml` and is generated when you first run the game with the mod installed.
+The configuration file is located at `config/squatgrow-common.json5` and is generated when you first run the game with the mod installed.
 
 ### Options
 
 #### Example Configuration
 
-```yaml
-ae2Multiplier: 4
-allowAdventureTwerking: true
-chance: 1.0
-debug: false
-enableAE2Accelerator: true
-enableDirtToGrass: true
-enableMysticalCrops: true
-hoeTakesDamage: false
-ignoreList: ['minecraft:grass_block', 'minecraft:grass', 'minecraft:tall_grass', 'minecraft:netherrack', 'minecraft:warped_nylium', 'minecraft:crimson_nylium']
-randomTickMultiplier: 4
-range: 16
-requireHoe: false
-requirements:
-    durabilityDamage: 1
-    enabled: false
-    equipmentRequirement:
-      HEAD: 'minecraft:iron_helmet'
-    heldItemRequirement: ["minecraft:diamond_hoe", "minecraft:golden_hoe"]
-    requiredEnchantment: ''
-    requiredItemTakesDamage: false
-sugarcaneMultiplier: 4
-useWhitelist: false
+```json5
+{
+  /*
+   * AE2 growth multiplier, only available if AE2 is present
+   * Value must be between 1 and 16
+   */
+  ae2Multiplier: 4,
+  // Requirements for growing
+  requirements: {
+    /*
+     * The chance for the required item to take durability damage when used to grow a block, between 0 and 1. This is only used if durabilityCost is greater than 0.
+     * Value must be between 0.0 and 1.0
+     */
+    durabilityChance: 0.01,
+    // List of enchantments required on the item to grow, leave empty to disable, format is <enchantment_id>@<level>, for example minecraft:fortune@3 or, optionally, omit the level to just check for the presence of the enchantment minecraft:fortune
+    enchants: [
+      "minecraft:fortune@3",
+    ],
+    // Whether the required item should take durability damage when used to grow a block. If the item is not durable, this will have no effect. Leave as 0 to disable durability damage.
+
+    durabilityCost: 1,
+    // List of items required to grow, leave empty to disable, can be either item ids or tags (use #minecraft:<tag_name> or #modid:<tag_name>)
+    items: [
+      "minecraft:diamond_hoe",
+    ],
+  },
+  // Enable debug logging
+  debug: false,
+  /*
+   * Chance for a block to grow, between 0 and 1
+   * Value must be between 0.0 and 1.0
+   */
+  chance: 1.0,
+  // Use whitelist instead of blacklist, default false
+  useWhitelist: false,
+  // Allow twerking in adventure mode, default true
+  allowAdventureTwerking: true,
+  // List of blocks to blacklist/whitelist from twerking, Tags can be used by using #minecraft:<tag_name> or #modid:<tag_name>
+  ignoreList: [
+    "minecraft:grass_block",
+    "minecraft:short_grass",
+    "minecraft:tall_grass",
+    "minecraft:netherrack",
+    "minecraft:warped_nylium",
+    "minecraft:crimson_nylium",
+  ],
+  /*
+   * Range of effect, warning: this can cause lag if set too high
+   * Value must be between 0 and 16
+   */
+  range: 3,
+  // Enable Mystical Crops growth support
+  enableMysticalCrops: true,
+  // When the player is holding a grass block in their offhand, they will be able to randomly convert dirt into grass
+  enableDirtToGrass: true,
+  /*
+   * Random tick multiplier, this is the amount of times the mod will call the randomTick method on the block for each block in the range
+   * Value must be between 1 and 16
+   */
+  randomTickMultiplier: 4,
+  // Enable AE2 crystal growth support, only available if AE2 is present
+  enableAE2Accelerator: true,
+}
 ```
 
 #### Options
@@ -80,25 +120,8 @@ useWhitelist: false
 | `sugarcaneMultiplier` | The multiplier for sugarcane growth                                                                      | `4`       |
 | `randomTickMultiplier` | The multiplier for random ticks for blocks that grow via random ticks                                    | `4`       |
 | `range` | The range in which to check for blocks to grow                                                           | `16`      |
-| `debug` | Whether or not to enable debug mode                                                                      | `false`   |
-| `requireHoe` | Whether or not to require a hoe to be held to grow crops (Depercated, please do not use)                 | `false`   |
-| `hoeTakesDamage` | Whether or not to take damage when using a hoe to grow crops (Depercated, please do not use)             | `false`   |
 | `useWhitelist` | Whether or not to use a whitelist or blacklist for blocks to grow                                        | `false`   |
 | `ignoreList` | A list of blocks to ignore when growing crops (When whitelist is enabled, this is used as the whitelist) | See above |
-
-### Requirements
-
-The requirements system is a new system that allows you to require certain items to be held or equipment to be worn to grow crops.
-
-| Option | Description                                                                                              | Default |
-| ------ |----------------------------------------------------------------------------------------------------------|---------|
-| `requirements` | The requirements system for growing crops                                                               | N/a     |
-| `requirements.enabled` | Whether or not to enable the requirements system                                                        | `false` |
-| `requirements.heldItemRequirement` | A list of items that are required to be held to grow crops                                           | `[]`    |
-| `requirements.equipmentRequirement` | A map of equipment slots to items that are required to be worn to grow crops                        | `{}`    |
-| `requirements.requiredEnchantment` | The enchantment that is required to grow crops                                                         | `''`    |
-| `requirements.requiredItemTakesDamage` | Whether or not the required item takes damage when growing crops                                    | `false` |
-| `requirements.durabilityDamage` | The amount of damage to take when growing crops                                                        | `1`     |
 
 ##### Integration Options
 

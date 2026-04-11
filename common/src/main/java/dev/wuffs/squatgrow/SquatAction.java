@@ -3,126 +3,97 @@ package dev.wuffs.squatgrow;
 import dev.wuffs.squatgrow.actions.Action;
 import dev.wuffs.squatgrow.actions.ActionContext;
 import dev.wuffs.squatgrow.actions.Actions;
+import dev.wuffs.squatgrow.config.ComputedConfigValues;
 import dev.wuffs.squatgrow.config.SquatGrowConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.Holder;
-import net.minecraft.core.component.DataComponents;
-import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.tags.ItemTags;
-import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
-import org.apache.commons.lang3.tuple.Pair;
+import org.jspecify.annotations.Nullable;
 
-import java.util.*;
-
-import static dev.wuffs.squatgrow.SquatGrow.*;
+import java.util.List;
+import java.util.Set;
 
 public class SquatAction {
     public static void performAction(Level level, Player player) {
         if (level.isClientSide()) return;
 
         var serverPlayer = (ServerPlayer) player;
-        if (!config.allowAdventureTwerking && serverPlayer.gameMode.getGameModeForPlayer() == GameType.ADVENTURE) return;
+        if (!SquatGrowConfig.allowAdventureTwerking.get() && serverPlayer.gameMode.getGameModeForPlayer() == GameType.ADVENTURE) return;
 
-        if (!SquatPlatform.isSquatGrowEnabled(serverPlayer)) {
+        if (!SquatGrowPlatform.INSTANCE.isSquatGrowEnabled(serverPlayer)) {
             return;
         }
 
-        Pair<Boolean, List<ItemStack>> requirementsTest = passesRequirements(player);
-        if (!requirementsTest.getKey()) {
-            return;
-        }
-
-        grow(level, (ServerPlayer) player, requirementsTest.getValue());
-    }
-
-    public static Pair<Boolean, List<ItemStack>> passesRequirements(Player player) {
-        List<ItemStack> itemsThatHandleDamage = new ArrayList<>();
-        // Legacy support, if this is enabled, the requirements system is disabled.
-        if (config.requireHoe) {
-            // Meh, lists aren't free but emptylist is a constant so it's fine
-            var matchedItem = getMatchingHeldItem(player, Collections.emptyList(), List.of(ItemTags.HOES));
-            if (!matchedItem.isEmpty()) {
-                itemsThatHandleDamage.add(matchedItem);
-                return Pair.of(true, itemsThatHandleDamage);
+        ComputedConfigValues config = ComputedConfigValues.get();
+        ItemStack itemToDamage = null;
+        if (config.shouldEvaluate()) {
+            var itemThatPasses = itemThatPasses(config, level, player);
+            if (itemThatPasses == null) {
+                return;
             }
 
-            return Pair.of(false, itemsThatHandleDamage);
+            itemToDamage = itemThatPasses;
         }
 
-        SquatGrowConfig.Requirements requirements = config.requirements;
-        if (requirements.enabled && SquatGrow.computedRequirements != null) {
-            // Easier to compare the originals than it is to compare the computed ones
-            if (requirements.heldItemRequirement.isEmpty() && requirements.equipmentRequirement.isEmpty()) {
-                return Pair.of(true, itemsThatHandleDamage);
+        final ItemStack finalItemToDamage = itemToDamage;
+        grow(level, (ServerPlayer) player, () -> {
+            if (finalItemToDamage == null) {
+                return;
             }
 
-            // Let's check the correct things. First, the lighter of the two checks
-            boolean passesEquipment = false;
-            if (!requirements.equipmentRequirement.isEmpty()) {
-                var matchingEquipment = matchingEquipmentItem(player.level(), player, computedRequirements.equipmentRequirementStacks(), computedRequirements.equipmentRequirementTags());
-
-                // This is safe to do as it will only increment if the equipment is found, and you can only have one item per slot
-                if (matchingEquipment.size() == requirements.equipmentRequirement.size()) {
-                    itemsThatHandleDamage.addAll(matchingEquipment);
-                    passesEquipment = true;
+            if (SquatGrowConfig.durabilityCost.get() > 0) {
+                var chance = SquatGrowConfig.durabilityChance.get();
+                var random = level.getRandom();
+                if (chance < random.nextDouble()) {
+                    return;
                 }
+
+                finalItemToDamage.hurtAndBreak(SquatGrowConfig.durabilityCost.get(), player, player.getUsedItemHand() == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
             }
-
-            if (!requirements.equipmentRequirement.isEmpty() && !passesEquipment) {
-                return Pair.of(false, itemsThatHandleDamage); // If the equipment check is required and failed, we can return false
-            }
-
-            // Now, the heavier of the two checks
-            // We can only have gotten here if heldItemRequirement is not empty so no need to check again
-            boolean passedHeldItem = false;
-            var matchingHeldItem = getMatchingHeldItem(player, computedRequirements.heldItemRequirementStacks(), computedRequirements.heldItemRequirementTags());
-            if (!matchingHeldItem.isEmpty()) {
-                itemsThatHandleDamage.add(matchingHeldItem);
-                passedHeldItem = true;
-            }
-
-            if (!requirements.heldItemRequirement.isEmpty() && !passedHeldItem) {
-                return Pair.of(false, itemsThatHandleDamage); // If the held item check is required and failed, we can return false
-            }
-
-            return Pair.of(true, itemsThatHandleDamage); // If we got here, we passed both checks
-        }
-
-        // Nothing is required, so we can return true
-        return Pair.of(true, Collections.emptyList());
+        });
     }
 
-    public static void grow(Level level, ServerPlayer player, List<ItemStack> itemsToDamage) {
+    @Nullable
+    public static ItemStack itemThatPasses(ComputedConfigValues config, Level level, Player player) {
+        List<ItemStack> items = List.of(player.getMainHandItem(), player.getOffhandItem());
+        for (ItemStack item : items) {
+            if (item.isEmpty()) continue;
+
+            if (config.itemMatches(level, item)) {
+                return item;
+            }
+        }
+
+        return null;
+    }
+
+    public static void grow(Level level, ServerPlayer player, Runnable onGrowth) {
         BlockPos pos = player.blockPosition();
 
-        var r = level.random;
+        var random = level.getRandom();
 
         // Actions
         Set<Action> actions = Actions.get().getActions();
 
-        for (int x = -config.range; x <= config.range; x++) {
-            for (int z = -config.range; z <= config.range; z++) {
+        var range = SquatGrowConfig.range.get();
+        for (int x = -range; x <= range; x++) {
+            for (int z = -range; z <= range; z++) {
                 for (int y = -1; y <= 1; y++) {
-                    double randomValue = 0 + 1 * r.nextDouble();
-                    if (config.chance < randomValue) {
+                    double randomValue = 0 + 1 * random.nextDouble();
+                    if (SquatGrowConfig.chance.get() < randomValue) {
                         continue;
                     }
 
@@ -130,7 +101,7 @@ public class SquatAction {
                     BlockPos offsetLocation = pos.offset(x, y, z);
                     BlockState offsetState = level.getBlockState(offsetLocation);
 
-                    if (offsetState.isAir() || !SquatGrow.allowTwerk(offsetState)) {
+                    if (offsetState.isAir() || !blockAllowsTwerk(offsetState)) {
                         continue;
                     }
 
@@ -151,15 +122,9 @@ public class SquatAction {
                         didGrow = action.execute(context);
                     }
 
-                    if ((config.hoeTakesDamage || config.requirements.requiredItemTakesDamage) && didGrow && !itemsToDamage.isEmpty()) {
-                        var durabilityToApply = config.hoeTakesDamage ? 1 : config.requirements.durabilityDamage;
-                        for (ItemStack item : itemsToDamage) {
-                            item.hurtAndBreak(durabilityToApply, player, player.getUsedItemHand() == InteractionHand.MAIN_HAND ? EquipmentSlot.MAINHAND : EquipmentSlot.OFFHAND);
-                        }
-                    }
-
                     if (didGrow) {
                         addGrowthParticles((ServerLevel) level, offsetLocation, player);
+                        onGrowth.run();
                     }
                 }
             }
@@ -167,7 +132,7 @@ public class SquatAction {
     }
 
     private static void addGrowthParticles(ServerLevel level, BlockPos pos, ServerPlayer player) {
-        var random = level.random;
+        var random = level.getRandom();
         int numParticles = 2;
 
         BlockState blockstate = level.getBlockState(pos);
@@ -213,83 +178,13 @@ public class SquatAction {
         }
     }
 
-    private static ItemStack getMatchingHeldItem(Player player, List<ItemStack> itemStacks, List<TagKey<Item>> itemTags) {
-        var mainHand = player.getMainHandItem();
-        var offHand = player.getOffhandItem();
-
-        // Check the main hand first
-        var matchingItem = compareItemToLists(player.level(), mainHand, itemStacks, itemTags);
-        if (!matchingItem.isEmpty()) {
-            return matchingItem;
-        }
-
-        // Check the offhand next
-        return compareItemToLists(player.level(), offHand, itemStacks, itemTags);
+    public static Boolean blockAllowsTwerk(BlockState state) {
+        return SquatGrowConfig.useWhitelist.get() == isBlockInIgnoreList(state);
     }
 
-    private static ItemStack compareItemToLists(Level level, ItemStack stack, List<ItemStack> itemStacks, List<TagKey<Item>> itemTags) {
-        for (ItemStack item : itemStacks) {
-            if (itemStackMatches(level, stack, item)) {
-                return stack;
-            }
-        }
-
-        for (TagKey<Item> tag : itemTags) {
-            if (itemStackMatches(level, stack, tag)) {
-                return stack;
-            }
-        }
-
-        return ItemStack.EMPTY;
-    }
-
-    private static List<ItemStack> matchingEquipmentItem(Level level, Player player, Map<EquipmentSlot, ItemStack> equipmentStacks, Map<EquipmentSlot, TagKey<Item>> equipmentTags) {
-        List<ItemStack> matchedItems = new ArrayList<>();
-
-        for (Map.Entry<EquipmentSlot, ItemStack> entry : equipmentStacks.entrySet()) {
-            ItemStack itemBySlot = player.getItemBySlot(entry.getKey());
-            if (itemStackMatches(level, itemBySlot, entry.getValue())) {
-                matchedItems.add(itemBySlot);
-            }
-        }
-
-        for (Map.Entry<EquipmentSlot, TagKey<Item>> entry : equipmentTags.entrySet()) {
-            ItemStack itemBySlot = player.getItemBySlot(entry.getKey());
-            if (itemStackMatches(level, itemBySlot, entry.getValue())) {
-                matchedItems.add(itemBySlot);
-            }
-        }
-
-        return matchedItems;
-    }
-
-    private static boolean itemStackMatches(Level level, ItemStack stack, TagKey<Item> tag) {
-        if (computedEnchantment != null && stack.isEnchantable()) {
-            var enchantmentValue = computedEnchantment.get(level);
-            if (enchantmentValue != null && stack.is(tag)) {
-                ItemEnchantments itemEnchantments = stack.get(DataComponents.ENCHANTMENTS);
-                if (itemEnchantments != null) {
-                    return stack.is(tag) && itemEnchantments.getLevel(Holder.direct(enchantmentValue)) > 0;
-                }
-            }
-        }
-
-        return stack.is(tag);
-    }
-
-    private static boolean itemStackMatches(Level level, ItemStack stack, ItemStack item) {
-        if (computedEnchantment != null && stack.isEnchantable()) {
-            var enchantmentValue = computedEnchantment.get(level);
-            if (enchantmentValue != null) {
-                if (stack.is(item.getItem())) {
-                    ItemEnchantments itemEnchantments = stack.get(DataComponents.ENCHANTMENTS);
-                    if (itemEnchantments != null) {
-                        return itemEnchantments.getLevel(Holder.direct(enchantmentValue)) > 0;
-                    }
-                }
-            }
-        }
-
-        return stack.is(item.getItem());
+    static boolean isBlockInIgnoreList(BlockState state) {
+        return ComputedConfigValues.get().ignoreList().stream().anyMatch(e -> e.left()
+                .map(state::is)
+                .orElse(e.right().map(state::is).orElse(false)));
     }
 }
