@@ -20,7 +20,9 @@ allprojects {
     }
 
     repositories {
-        mavenLocal()
+        maven {
+            url = "https://maven.nanite.dev/releases"
+        }
     }
 
     idea {
