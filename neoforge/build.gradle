@@ -33,7 +33,7 @@ configurations {
 }
 
 dependencies {
-    implementation("dev.nanite.mods:nanite-library-neoforge:26.1.1.1")
+    api("dev.nanite.mods:nanite-library-neoforge:26.1.1.1")
 }
 
 java {

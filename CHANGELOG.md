@@ -1,6 +1,17 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [26.1.1.1]
+
+### Changes
+
+- Ported to 26.1+
+- We now require Nanite Library
+  - Configs are now `json5` and better documented
+- Migrated off of Architectury
+- Migrated off of Cloth Config
+- Requirements system has been reworked to be easier to understand and work with
+
 ## [21.11.0]
 
 ### Changed

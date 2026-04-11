@@ -13,4 +13,8 @@ public record ActionContext(
    ItemStack mainHand,
    ItemStack offhand,
    Player player
-) {}
+) {
+    public ActionContext withPosAndState(BlockPos newPos, BlockState newState) {
+        return new ActionContext(level, newPos, newState, mainHand, offhand, player);
+    }
+}

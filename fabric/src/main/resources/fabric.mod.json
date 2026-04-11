@@ -12,7 +12,6 @@
     "sources": "https://github.com/nanite/SquatGrow"
   },
   "license": "ARR",
-  "icon": "assets/examplemod/icon.png",
   "environment": "*",
   "entrypoints": {
     "main": [
