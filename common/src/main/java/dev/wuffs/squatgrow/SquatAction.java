@@ -146,8 +146,9 @@ public class SquatAction {
                         if (!action.canApply(context)) {
                             continue;
                         }
-
-                        didGrow = action.execute(context);
+                        try {
+                            didGrow = action.execute(context);
+                        } catch (Exception ignore) {}
                     }
 
                     if ((config.hoeTakesDamage || config.requirements.requiredItemTakesDamage) && didGrow && !itemsToDamage.isEmpty()) {
