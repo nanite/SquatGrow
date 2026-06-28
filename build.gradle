@@ -2,7 +2,7 @@ plugins {
     id 'java-library'
     id 'fabric-loom' version '1.15-SNAPSHOT' apply(false)
     id 'net.neoforged.moddev' version '2.0.141' apply(false)
-    id "me.modmuss50.mod-publish-plugin" version "1.1.0"
+    id "me.modmuss50.mod-publish-plugin" version "2.1.0"
     id 'pro.mikey.plugins.insaniam' version "0.1-SNAPSHOT"
 }
 
@@ -119,6 +119,8 @@ publishMods {
         project.supported_minecraft_versions.split(",").each { version -> {
             minecraftVersions.add(version.trim())
         }}
+        client = true
+        server = true
     }
 
     def modrinthOptions = modrinthOptions {
@@ -127,6 +129,7 @@ publishMods {
         project.supported_minecraft_versions.split(",").each { version -> {
             minecraftVersions.add(version.trim())
         }}
+        environment = CLIENT_AND_SERVER
     }
 
     curseforge("curseforgeFabric") {
