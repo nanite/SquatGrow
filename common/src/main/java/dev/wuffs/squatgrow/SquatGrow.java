@@ -1,12 +1,11 @@
 package dev.wuffs.squatgrow;
 
-import dev.architectury.event.events.client.ClientLifecycleEvent;
 import dev.architectury.event.events.common.LifecycleEvent;
 import dev.architectury.networking.NetworkManager;
-import dev.architectury.networking.simple.SimpleNetworkManager;
 import dev.architectury.platform.Platform;
 import dev.architectury.registry.ReloadListenerRegistry;
 import dev.wuffs.squatgrow.actions.Actions;
+import dev.wuffs.squatgrow.compat.Compatability;
 import dev.wuffs.squatgrow.config.ComputedRequirements;
 import dev.wuffs.squatgrow.config.SquatGrowConfig;
 import dev.wuffs.squatgrow.network.SquatGrowEnabledPacket;
@@ -14,12 +13,10 @@ import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.ConfigHolder;
 import me.shedaniel.autoconfig.serializer.YamlConfigSerializer;
 import net.fabricmc.api.EnvType;
-import net.fabricmc.api.Environment;
 import net.minecraft.core.Holder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -93,6 +90,7 @@ public class SquatGrow {
     private static void onSetup() {
         LOGGER.debug("Starting setup");
         Actions.get().setup();
+        Compatability.onSetup();
     }
 
     /**

@@ -21,7 +21,7 @@ public class PlayerMixin {
             if (!onGround) return;
 
             if (!squatgrow$wasCrouchingLastTick && crouching) {
-                SquatAction.performAction(player.level(), player);
+                SquatAction.performAction(player);
             }
 
             squatgrow$wasCrouchingLastTick = crouching;

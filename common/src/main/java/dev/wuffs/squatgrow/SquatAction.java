@@ -3,6 +3,7 @@ package dev.wuffs.squatgrow;
 import dev.wuffs.squatgrow.actions.Action;
 import dev.wuffs.squatgrow.actions.ActionContext;
 import dev.wuffs.squatgrow.actions.Actions;
+import dev.wuffs.squatgrow.compat.Compatability;
 import dev.wuffs.squatgrow.config.SquatGrowConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -21,7 +22,6 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
@@ -31,10 +31,13 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import java.util.*;
 
-import static dev.wuffs.squatgrow.SquatGrow.*;
+import static dev.wuffs.squatgrow.SquatGrow.computedEnchantment;
+import static dev.wuffs.squatgrow.SquatGrow.computedRequirements;
+import static dev.wuffs.squatgrow.SquatGrow.config;
 
 public class SquatAction {
-    public static void performAction(Level level, Player player) {
+    public static void performAction(Player player) {
+        Level level = player.level();
         if (level.isClientSide) return;
 
         var serverPlayer = (ServerPlayer) player;
@@ -49,7 +52,7 @@ public class SquatAction {
             return;
         }
 
-        grow(level, (ServerPlayer) player, requirementsTest.getValue());
+        grow((ServerPlayer) player, requirementsTest.getValue());
     }
 
     public static Pair<Boolean, List<ItemStack>> passesRequirements(Player player) {
@@ -109,9 +112,10 @@ public class SquatAction {
         return Pair.of(true, Collections.emptyList());
     }
 
-    public static void grow(Level level, ServerPlayer player, List<ItemStack> itemsToDamage) {
-        BlockPos pos = player.blockPosition();
+    public static void grow(ServerPlayer player, List<ItemStack> itemsToDamage) {
+        BlockPos pos = Compatability.getPosProvider().forPlayer(player);
 
+        Level level = player.level();
         var r = level.random;
 
         // Actions

@@ -8,6 +8,15 @@ loom {
 
 def ENV = System.getenv()
 
+repositories {
+    maven {
+        url = "https://maven.ryanhcode.dev/releases"
+        content { includeGroup "dev.ryanhcode.sable-companion" }
+    }
+}
+
+
+
 dependencies {
     // We depend on fabric loader here to use the fabric @Environment annotations and get the mixin dependencies
     // Do NOT use other classes from fabric loader
@@ -16,6 +25,7 @@ dependencies {
     modApi "dev.architectury:architectury:${rootProject.architectury_version}"
 
     modApi("me.shedaniel.cloth:cloth-config:${rootProject.cloth_config_version}")
+    compileOnly "dev.ryanhcode.sable-companion:sable-companion-common-${minecraft_version}:${sable_companion_version}"
 }
 
 publishing {
