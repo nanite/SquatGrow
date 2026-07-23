@@ -1,7 +1,7 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
-## [21.1.3]
+## [21.1.4]
 
 ### Added
 * Sable support for squat grow when in a sub-level
