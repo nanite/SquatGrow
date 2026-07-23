@@ -1,7 +1,7 @@
 plugins {
     id "architectury-plugin" version "3.4-SNAPSHOT"
     id "dev.architectury.loom" version "1.7-SNAPSHOT" apply false
-    id "me.modmuss50.mod-publish-plugin" version "0.5.1"
+    id "me.modmuss50.mod-publish-plugin" version "2.1.1"
 }
 
 ext.isSnapshot = providers.environmentVariable("SNAPSHOT").map { it == "true" }.getOrElse(false)
@@ -68,12 +68,15 @@ publishMods {
         accessToken = providers.environmentVariable("CURSE_TOKEN")
         projectId = "${curseforge_id}"
         minecraftVersions.add("${minecraft_version}")
+        client = true
+        server = true
     }
 
     def modrinthOptions = modrinthOptions {
         accessToken = providers.environmentVariable("MODRINTH_TOKEN")
         projectId = "${modrinth_id}"
         minecraftVersions.add("${minecraft_version}")
+        environment = CLIENT_AND_SERVER
     }
 
     curseforge("curseforgeFabric") {
